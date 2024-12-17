@@ -4,7 +4,7 @@ import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 
 export default createApp({
   server: {
-    preset: 'koyeb', // change to 'node' or 'bun' or anyof the supported presets for nitro (nitro.unjs.io)
+    preset: 'koyeb', // needed for docker support
     experimental: {
       asyncContext: true,
     },

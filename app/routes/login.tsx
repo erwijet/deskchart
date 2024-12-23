@@ -1,24 +1,10 @@
-import {
-    ActionIcon,
-    Anchor,
-    AspectRatio,
-    Box,
-    Button,
-    Center,
-    Divider,
-    Group,
-    Mark,
-    Overlay,
-    Paper,
-    Stack,
-    Text,
-    Title,
-} from "@mantine/core";
-import { createFileRoute } from "@tanstack/react-router";
-import { Github, Linkedin, Twitter } from "lucide-react";
-
+import { ActionIcon, Anchor, Box, Button, Center, Divider, Flex, Group, Overlay, Paper, rem, Stack, Text, Title } from "@mantine/core";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Github } from "lucide-react";
+import { Brand } from "shared/assets/Brand";
 import { Google } from "shared/assets/Google";
-import { theme } from "shared/theme";
+import { useIsMobile } from "shared/hooks/useIsMobile";
+
 import { trpc } from "~router";
 
 export const Route = createFileRoute("/login")({
@@ -34,10 +20,17 @@ function RouteComponent() {
         window.location.href = url;
     }
 
+    const { isMobile } = useIsMobile();
+
     return (
         <Group>
-            <Center h="100vh" flex={1}>
-                <Paper radius="md" p="xl" withBorder shadow="lg">
+            {isMobile && (
+                <Flex pos={"absolute"} top={0} left={0} h={rem(60)} w="100vw" bg={"var(--mantine-primary-color-filled)"} p='xs' justify={'center'}>
+                    <Brand />
+                </Flex>
+            )}
+            <Center h="100vh" flex={1} pos="relative">
+                <Paper radius="md" p="xl" withBorder shadow="lg" style={{ zIndex: 10e3 }}>
                     <Group wrap="nowrap" gap={4}>
                         <Title order={3} textWrap="nowrap">
                             Welcome to
@@ -57,12 +50,14 @@ function RouteComponent() {
                 </Paper>
                 <Footer />
             </Center>
-            <Box w="100%" h="100vh" pos={"relative"} flex={1} bg="black">
-                <Overlay
-                    gradient="linear-gradient(145deg, var(--mantine-color-green-7) 0%, var(--mantine-color-green-4) 100%)"
-                    opacity={1}
-                />
-            </Box>
+            {!isMobile && (
+                <Box w="100%" h="100vh" pos={"relative"} flex={1} bg="black">
+                    <Overlay
+                        gradient="linear-gradient(145deg, var(--mantine-color-green-7) 0%, var(--mantine-color-green-4) 100%)"
+                        opacity={1}
+                    />
+                </Box>
+            )}
         </Group>
     );
 }

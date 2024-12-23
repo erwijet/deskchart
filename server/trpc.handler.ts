@@ -32,7 +32,6 @@ const authenticated = t.procedure.use(async ({ ctx: { token }, next }) => {
 });
 
 const appRouter = t.router({
-    hello: t.procedure.query(() => "Hello world!"),
     notary: {
         getAuthUrl: t.procedure.input(z.literal("google")).query(async ({ input: via }) => await notary.authorize({ via })),
         inspect: t.procedure.input(z.string()).query(async ({ input }) => await notary.inspect(input)),
@@ -53,8 +52,6 @@ const appRouter = t.router({
                 }),
             ),
     },
-
-    stuff: authenticated.query((opts) => opts.ctx.user),
 });
 
 export type AppRouter = typeof appRouter;

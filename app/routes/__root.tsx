@@ -2,7 +2,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { Box, Loader } from "@mantine/core";
-import type { trpcQueryUtils } from "app/router";
+import type { trpcQueryUtils } from "~router";
 import { Suspense } from "react";
 
 export interface RouterAppContext {

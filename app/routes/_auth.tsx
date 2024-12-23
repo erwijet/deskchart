@@ -1,4 +1,4 @@
-import { AppShell, Box, Burger, Group } from "@mantine/core";
+import { AppShell, Box, Burger, Container, Group, rem } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Brand } from "components/assets/Brand";
@@ -25,7 +25,7 @@ function Component() {
     return (
         <AppShell
             header={{ height: 60, collapsed: !isMobile }}
-            navbar={{ width: "fit-content", breakpoint: "sm", collapsed: { mobile: !opened } }}
+            navbar={{ width: rem(80), breakpoint: "sm", collapsed: { mobile: !opened } }}
         >
             <AppShell.Header>
                 <Group h="100%" px="md" justify="space-between">
@@ -39,7 +39,9 @@ function Component() {
                 <Navbar />
             </AppShell.Navbar>
             <AppShell.Main>
-                <Outlet />
+                <Container size={"lg"}>
+                    <Outlet />
+                </Container>
             </AppShell.Main>
         </AppShell>
     );

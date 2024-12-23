@@ -1,8 +1,8 @@
 import { Stack, Tooltip, UnstyledButton } from "@mantine/core";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import classes from "components/Navbar/Navbar.module.css";
 import { Grid3X3, LogOut, School, Settings } from "lucide-react";
-import { useState } from "react";
+import { usePathname } from "shared/hooks/usePathname";
 
 import { Brand } from "../assets/Brand";
 
@@ -23,17 +23,23 @@ function NavbarLink({ icon: Icon, label, active, onClick }: NavbarLinkProps) {
     );
 }
 
-const mockdata = [
-    { icon: School, label: "Classrooms" },
-    { icon: Grid3X3, label: "Desk Plans" },
-    { icon: Settings, label: "Settings" },
+const routes = [
+    { icon: School, label: "Classrooms", path: "/classrooms" },
+    { icon: Grid3X3, label: "Desk Plans", path: "/deskplans" },
+    { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
 export const Navbar = () => {
-    const [active, setActive] = useState(2);
+    const { location } = useRouterState();
+    const nav = useNavigate();
 
-    const links = mockdata.map((link, index) => (
-        <NavbarLink {...link} key={link.label} active={index === active} onClick={() => setActive(index)} />
+    const links = routes.map((link) => (
+        <NavbarLink
+            {...link}
+            key={link.label}
+            active={location.pathname.startsWith(link.path)}
+            onClick={() => void nav({ to: link.path })}
+        />
     ));
 
     return (

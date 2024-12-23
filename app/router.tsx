@@ -3,19 +3,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCQueryUtils, createTRPCReact } from "@trpc/react-query";
+import type { AppRouter } from "server/trpc.handler";
 import { session } from "shared/session";
 
-import { routeTree } from "../app/routeTree.gen";
-import type { AppRouter } from "../server/trpc.handler";
+import { routeTree } from "~routeTree.gen";
 
 export const queryClient = new QueryClient();
 
 export const api = createTRPCClient<AppRouter>({
     links: [
         httpBatchLink({
-            headers: {
+            headers: () => ({
                 Authorization: `Bearer ${session.getToken()}`,
-            },
+            }),
             url: "/trpc",
         }),
     ],

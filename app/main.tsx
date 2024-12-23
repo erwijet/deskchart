@@ -2,15 +2,15 @@
 
 import "@mantine/core/styles.css";
 
-import { RouterProvider } from "@tanstack/react-router";
 import { MantineProvider } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { ModalsProvider } from "@mantine/modals";
+import { RouterProvider } from "@tanstack/react-router";
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { theme } from "shared/theme";
 
 import { createRouter } from "../app/router";
-import { useMediaQuery } from "@mantine/hooks";
-import { theme } from "shared/theme";
 
 // Set up a Router instance
 const router = createRouter();
@@ -19,7 +19,7 @@ const App = () => {
     const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
 
     return (
-        <MantineProvider theme={theme}>
+        <MantineProvider theme={theme} forceColorScheme={prefersDark ? "dark" : "light"}>
             <ModalsProvider>
                 <RouterProvider router={router} />
             </ModalsProvider>

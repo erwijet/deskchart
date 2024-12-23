@@ -1,13 +1,15 @@
-import { AppShell, Burger, Group } from "@mantine/core";
+import { AppShell, Box, Burger, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { Navbar } from "app/shared/components/Navbar";
-import { useIsMobile } from "app/shared/hooks/useIsMobile";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { Brand } from "components/assets/Brand";
+import { Navbar } from "components/Navbar";
+import { useIsMobile } from "shared/hooks/useIsMobile";
 import { qc, queries } from "shared/query";
+import { session } from "shared/session";
 
 export const Route = createFileRoute("/_auth")({
     beforeLoad: () => {
-        const token = localStorage.getItem("app.deskchart.notary.token");
+        const token = session.getToken();
         if (!token) throw redirect({ to: "/login" });
     },
     loader: async () => {
@@ -26,15 +28,19 @@ function Component() {
             navbar={{ width: "fit-content", breakpoint: "sm", collapsed: { mobile: !opened } }}
         >
             <AppShell.Header>
-                <Group h="100%" px="md">
+                <Group h="100%" px="md" justify="space-between">
                     <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-                    {/* <MantineLogo size={30} /> */}
+                    <Box h="30px" w="30px">
+                        <Brand />
+                    </Box>
                 </Group>
             </AppShell.Header>
             <AppShell.Navbar>
                 <Navbar />
             </AppShell.Navbar>
-            <AppShell.Main>Main</AppShell.Main>
+            <AppShell.Main>
+                <Outlet />
+            </AppShell.Main>
         </AppShell>
     );
 }

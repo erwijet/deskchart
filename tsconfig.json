@@ -9,9 +9,9 @@
         "skipLibCheck": true,
         "lib": ["DOM", "DOM.Iterable", "ES2022"],
         "paths": {
-            "app/*": ["./app/*"],
             "shared/*": ["./app/shared/*"],
-            "components/*": ["./app/shared/components/*"]
+            "components/*": ["./app/shared/components/*"],
+            "~*": ["./app/*"]
         }
     }
 }

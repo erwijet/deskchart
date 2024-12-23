@@ -4,33 +4,33 @@
     padding: var(--mantine-spacing-md);
     display: flex;
     flex-direction: column;
-    background-color: var(--mantine-color-blue-filled);
-  }
-  
-  .navbarMain {
+    background-color: var(--mantine-primary-color-filled);
+}
+
+.navbarMain {
     flex: 1;
     margin-top: 50px;
-  }
-  
-  .link {
+}
+
+.link {
     width: 50px;
     height: 50px;
     border-radius: var(--mantine-radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--mantine-color-white);
-  
+    color: var(--mantine-primary-color-contrast);
+
     &:hover {
-      background-color: var(--mantine-color-blue-7);
+        background-color: var(--mantine-primary-color-filled-hover);
     }
-  
+
     &[data-active] {
-      &,
-      &:hover {
-        box-shadow: var(--mantine-shadow-sm);
-        background-color: var(--mantine-color-white);
-        color: var(--mantine-color-blue-6);
-      }
+        &,
+        &:hover {
+            box-shadow: var(--mantine-shadow-sm);
+            background-color: var(--mantine-primary-color-contrast);
+            color: var(--mantine-primary-color-filled);
+        }
     }
-  }
+}

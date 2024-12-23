@@ -5,7 +5,8 @@ import { z } from "zod";
 export const Route = createFileRoute("/callback")({
     preload: false,
     validateSearch: z.object({ token: z.string() }),
-    beforeLoad: ({ search: { token } }) => {
+    loaderDeps: ({ search: { token } }) => ({ token }),
+    loader: ({ deps: { token } }) => {
         session.setToken(token);
         throw redirect({ to: "/" });
     },

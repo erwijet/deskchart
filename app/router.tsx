@@ -1,17 +1,21 @@
+import { Box, Center, Loader } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCQueryUtils, createTRPCReact } from "@trpc/react-query";
+import { session } from "shared/session";
 
 import { routeTree } from "../app/routeTree.gen";
 import type { AppRouter } from "../server/trpc.handler";
-import { Box, Center, Loader } from "@mantine/core";
 
 export const queryClient = new QueryClient();
 
 export const api = createTRPCClient<AppRouter>({
     links: [
         httpBatchLink({
+            headers: {
+                Authorization: `Bearer ${session.getToken()}`,
+            },
             url: "/trpc",
         }),
     ],
@@ -22,6 +26,9 @@ export const trpc = createTRPCReact<AppRouter>({});
 const client = trpc.createClient({
     links: [
         httpBatchLink({
+            headers: () => ({
+                Authorization: `Bearer ${session.getToken()}`,
+            }),
             // since we are using Vinxi, the server is running on the same port,
             // this means in dev the url is `http://localhost:3000/trpc`
             // and since its from the same origin, we don't need to explicitly set the full URL

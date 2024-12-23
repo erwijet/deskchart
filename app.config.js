@@ -8,10 +8,7 @@ export default createApp({
         preset: "koyeb", // needed for docker support
         experimental: {
             asyncContext: true,
-        },
-        $env: {
-            your: "mom",
-        },
+        }
     },
     routers: [
         {

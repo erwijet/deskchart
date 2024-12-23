@@ -1,6 +1,6 @@
 import { QueryCache, QueryClient, queryOptions } from "@tanstack/react-query";
 import { redirect } from "@tanstack/react-router";
-import { api } from "app/router";
+import { api } from "~router";
 import { session } from "shared/session";
 
 interface QueryCacheQuery {

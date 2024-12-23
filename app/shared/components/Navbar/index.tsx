@@ -1,12 +1,13 @@
-import { Center, Image, Stack, Tooltip, UnstyledButton } from "@mantine/core";
-import { IconChalkboard, IconHome2, IconLayout, IconLayoutGrid, IconLogout, IconSchool, IconSettings } from "@tabler/icons-react";
-import classes from "components/Navbar/Navbar.module.css";
-import { useState } from "react";
-import { Brand } from "../assets/Brand";
+import { Stack, Tooltip, UnstyledButton } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
+import classes from "components/Navbar/Navbar.module.css";
+import { Grid3X3, LogOut, School, Settings } from "lucide-react";
+import { useState } from "react";
+
+import { Brand } from "../assets/Brand";
 
 interface NavbarLinkProps {
-    icon: typeof IconHome2;
+    icon: typeof School;
     label: string;
     active?: boolean;
     onClick?: () => void;
@@ -16,16 +17,16 @@ function NavbarLink({ icon: Icon, label, active, onClick }: NavbarLinkProps) {
     return (
         <Tooltip label={label} position="right" transitionProps={{ duration: 0 }}>
             <UnstyledButton onClick={onClick} className={classes.link} data-active={active || undefined}>
-                <Icon size={20} stroke={1.5} />
+                <Icon size={20} strokeWidth={1.5} />
             </UnstyledButton>
         </Tooltip>
     );
 }
 
 const mockdata = [
-    { icon: IconChalkboard, label: "Classrooms" },
-    { icon: IconLayout, label: "Desk Plans" },
-    { icon: IconSettings, label: "Settings" },
+    { icon: School, label: "Classrooms" },
+    { icon: Grid3X3, label: "Desk Plans" },
+    { icon: Settings, label: "Settings" },
 ];
 
 export const Navbar = () => {
@@ -49,7 +50,7 @@ export const Navbar = () => {
 
             <Stack justify="center" gap={0}>
                 <Link to="/logout">
-                    <NavbarLink icon={IconLogout} label="Logout" />
+                    <NavbarLink icon={LogOut} label="Logout" />
                 </Link>
             </Stack>
         </nav>

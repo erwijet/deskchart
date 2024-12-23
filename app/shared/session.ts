@@ -1,5 +1,7 @@
+const key = "app.deskchart.notary.token";
+
 export const session = {
-    getToken: () => localStorage.getItem("app.deskchart.notary.token"),
-    setToken: (token: string) => localStorage.setItem("app.deskchart.notary.token", token),
-    clear: () => localStorage.removeItem("app.deskchart.notary.token"),
+    getToken: () => localStorage.getItem(key),
+    setToken: (token: string) => localStorage.setItem(key, token),
+    clear: () => localStorage.removeItem(key),
 };

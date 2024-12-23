@@ -25,8 +25,8 @@ function RootComponent() {
             >
                 <Outlet />
             </Suspense>
-            <TanStackRouterDevtools position="bottom-left" />
-            <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
+            {/* <TanStackRouterDevtools position="bottom-left" />
+            <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" /> */}
         </>
     );
 }

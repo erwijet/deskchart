@@ -4,11 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_CLIENTVAR: "clientvar"
-    working_dir: /app
     ports:
       - "3000:3000"
     image: holewinski.dev/deskchart:latest
-    # env_file:
-    #   - .env
+    env_file:
+      - .env

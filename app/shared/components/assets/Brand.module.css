@@ -1,0 +1,19 @@
+.cls-1 {
+    stroke-width: 10px;
+}
+
+.cls-1,
+.cls-2 {
+    fill: none;
+    stroke: var(--mantine-primary-color-7);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.cls-2 {
+    stroke-width: 18px;
+}
+
+.cls-3 {
+    fill: #fff;
+}

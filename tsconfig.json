@@ -1,11 +1,17 @@
 {
-  "compilerOptions": {
-    "strict": true,
-    "esModuleInterop": true,
-    "jsx": "react-jsx",
-    "target": "ESNext",
-    "moduleResolution": "Bundler",
-    "skipLibCheck": true,
-    "lib": ["DOM", "DOM.Iterable", "ES2022"]
-  }
+    "compilerOptions": {
+        "strict": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "jsx": "react-jsx",
+        "target": "ESNext",
+        "moduleResolution": "Bundler",
+        "skipLibCheck": true,
+        "lib": ["DOM", "DOM.Iterable", "ES2022"],
+        "paths": {
+            "app/*": ["./app/*"],
+            "shared/*": ["./app/shared/*"],
+            "components/*": ["./app/shared/components/*"]
+        }
+    }
 }

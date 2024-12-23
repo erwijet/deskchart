@@ -1,4 +1,4 @@
-import classes from "shared/components/assets/Brand.module.css";
+import classes from "shared/assets/Brand.module.css";
 
 export const Brand = () => {
     return (

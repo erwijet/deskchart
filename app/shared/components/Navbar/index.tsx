@@ -4,7 +4,7 @@ import classes from "components/Navbar/Navbar.module.css";
 import { Grid3X3, LogOut, School, Settings } from "lucide-react";
 import { usePathname } from "shared/hooks/usePathname";
 
-import { Brand } from "../assets/Brand";
+import { Brand } from "../../assets/Brand";
 
 interface NavbarLinkProps {
     icon: typeof School;

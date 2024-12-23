@@ -2,7 +2,7 @@ import { Button, Center, Divider, Group, Paper, Text, Title } from "@mantine/cor
 import { createFileRoute } from "@tanstack/react-router";
 
 import { trpc } from "~router";
-import { Google } from "components/assets/Google";
+import { Google } from "shared/assets/Google";
 
 export const Route = createFileRoute("/login")({
     component: RouteComponent,

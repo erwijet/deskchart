@@ -20,7 +20,7 @@ const App = () => {
 
     return (
         <MantineProvider theme={theme} forceColorScheme={prefersDark ? "dark" : "light"}>
-            <ModalsProvider>
+            <ModalsProvider modalProps={{ centered: true }}>
                 <RouterProvider router={router} />
             </ModalsProvider>
         </MantineProvider>

@@ -5,7 +5,7 @@
         "esModuleInterop": true,
         "jsx": "react-jsx",
         "target": "ESNext",
-        "moduleResolution": "Bundler",
+        "moduleResolution": "node",
         "skipLibCheck": true,
         "lib": ["DOM", "DOM.Iterable", "ES2022"],
         "paths": {

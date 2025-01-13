@@ -1,6 +1,6 @@
 import { Stack, Tooltip, UnstyledButton } from "@mantine/core";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import classes from "components/Navbar/Navbar.module.css";
+import classes from "components/navbar/navbar.module.css";
 import { Grid3X3, LogOut, School, Settings } from "lucide-react";
 import { Brand } from "../../assets/Brand";
 import { useIsMobile } from "shared/hooks/use-is-mobile";

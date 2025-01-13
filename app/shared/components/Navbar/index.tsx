@@ -1,10 +1,9 @@
 import { Stack, Tooltip, UnstyledButton } from "@mantine/core";
-import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import classes from "components/Navbar/Navbar.module.css";
 import { Grid3X3, LogOut, School, Settings } from "lucide-react";
-import { usePathname } from "shared/hooks/usePathname";
-
 import { Brand } from "../../assets/Brand";
+import { useIsMobile } from "shared/hooks/use-is-mobile";
 
 interface NavbarLinkProps {
     icon: typeof School;
@@ -31,23 +30,25 @@ const routes = [
 
 export const Navbar = () => {
     const { location } = useRouterState();
-    const nav = useNavigate();
+    const { isMobile } = useIsMobile();
+    const navigate = useNavigate();
 
     const links = routes.map((link) => (
         <NavbarLink
             {...link}
             key={link.label}
             active={location.pathname.startsWith(link.path)}
-            onClick={() => void nav({ to: link.path })}
+            onClick={() => void navigate({ to: link.path })}
         />
     ));
 
     return (
         <nav className={classes.navbar}>
-            <Link to="/">
-                <Brand />
-            </Link>
-
+            {!isMobile && (
+                <Link to="/">
+                    <Brand />
+                </Link>
+            )}
             <div className={classes.navbarMain}>
                 <Stack justify="center" gap={0}>
                     {links}

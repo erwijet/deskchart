@@ -1,7 +1,6 @@
 import { QueryCache, QueryClient, queryOptions } from "@tanstack/react-query";
-import { redirect } from "@tanstack/react-router";
-import { api } from "~router";
-import { session } from "shared/session";
+import { runCatching } from "shared/fns";
+import { api } from "shared/trpc";
 
 interface QueryCacheQuery {
     meta?: {
@@ -12,19 +11,9 @@ interface QueryCacheQuery {
 
 export const qc = new QueryClient({
     // Default options are overridable on a per query/mutation basis
-    defaultOptions: {
-        queries: {
-            retry: false,
-            throwOnError: true,
-            refetchOnWindowFocus: false,
-        },
-        mutations: {
-            retry: false,
-            throwOnError: true,
-        },
-    },
+    defaultOptions: {},
     queryCache: new QueryCache({
-        onError: (error, query: QueryCacheQuery) => {
+        onError: (_error, query: QueryCacheQuery) => {
             query.meta?.errorCallback?.();
         },
     }),
@@ -35,14 +24,13 @@ export const queries = {
         queryOptions({
             queryKey: ["session"],
             queryFn: async () => {
-                const result = await api.notary.inspect.query(session.getToken() ?? "<NONE>");
-                if (!result.valid) throw redirect({ to: "/logout" });
+                const session = await runCatching(() => api.session.get.query());
 
                 const computed = {
-                    initials: (result.claims.givenName.toUpperCase().at(0) ?? "") + result.claims.familyName.toUpperCase().at(0),
+                    initials: (session?.user.givenName.toUpperCase().at(0) ?? "") + session?.user.familyName.toUpperCase().at(0),
                 };
 
-                return { ...result.claims, ...computed };
+                return { ...session?.user, ...computed };
             },
         }),
 };

@@ -1,6 +1,5 @@
 import reactPlugin from "eslint-plugin-react";
 import noRelativeImportPlugin from "eslint-plugin-no-relative-import-paths";
-import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
 import unusedImportsPlugin from "eslint-plugin-unused-imports";
 import importPlugin from "eslint-plugin-import";
 import prettierPlugin from "eslint-plugin-prettier";
@@ -25,7 +24,6 @@ const config = [
         plugins: {
             react: reactPlugin,
             "no-relative-import-paths": noRelativeImportPlugin,
-            "simple-import-sort": simpleImportSortPlugin,
             "unused-imports": unusedImportsPlugin,
             import: importPlugin,
             prettier: prettierPlugin,
@@ -76,14 +74,13 @@ const config = [
                     prefix: "",
                 },
             ],
-            "simple-import-sort/imports": "error",
             "unused-imports/no-unused-imports": "error",
             "import/no-default-export": "error",
             "prettier/prettier": "error",
             "no-unused-vars": "off",
             "no-extra-boolean-cast": "off",
             "no-console": "error",
-            "prefer-destructuring": "error"
+            "prefer-destructuring": "error",
         },
     },
     // overrides

@@ -1,5 +1,5 @@
 generator client {
-    provider = "prisma-client-js"
+    provider      = "prisma-client-js"
     binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl", "linux-musl-arm64-openssl-3.0.x"]
 }
 
@@ -9,65 +9,66 @@ datasource db {
 }
 
 model Class {
-    id          String      @id @default(cuid())
+    id          String @id @default(cuid())
     title       String
     description String
 
-    ownerId     String
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
+    ownerId   String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-    students    Student[]
-    layouts     Layout[]
+    students Student[]
+    layouts  Layout[]
 }
 
 model Layout {
-    id          String      @id @default(cuid())
-    title       String
-    description String
+    id    String @id @default(cuid())
+    title String
 
-    classId     String
-    class       Class       @relation(fields: [classId], references: [id])
+    classId String
+    class   Class  @relation(fields: [classId], references: [id])
 
-    height      Int
-    width       Int
-    pods        Pod[]
+    height Int
+    width  Int
+    pods   Pod[]
 
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([title, classId])
 }
 
 model Pod {
-    id          String      @id @default(cuid())
-    title       String
-    hex         String
+    id    String @id @default(cuid())
+    title String
+    hex   String
 
-    seats       Seat[]
+    seats Seat[]
 
-    layoutId    String
-    layout      Layout      @relation(fields: [layoutId], references: [id])
+    layoutId String
+    layout   Layout @relation(fields: [layoutId], references: [id])
 }
 
 model Seat {
-    id          String      @id @default(cuid())
-    row         Int
-    col         Int
+    id  String @id @default(cuid())
+    row Int
+    col Int
 
-    podId       String
-    pod         Pod         @relation(fields: [podId], references: [id])
+    podId String
+    pod   Pod    @relation(fields: [podId], references: [id])
 }
 
 model Student {
-    id          String      @id @default(cuid())
-    gn          String
-    sn          String
+    id String @id @default(cuid())
+    gn String
+    sn String
 
-    classId     String
-    class       Class       @relation(fields: [classId], references: [id])
+    classId String
+    class   Class  @relation(fields: [classId], references: [id])
 
-    ownerId     String
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
+    ownerId   String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 // model Post {
@@ -80,4 +81,3 @@ model Student {
 
 //     @@index([name])
 // }
-

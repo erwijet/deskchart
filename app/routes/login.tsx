@@ -1,18 +1,17 @@
 import { ActionIcon, Anchor, Box, Button, Center, Divider, Flex, Group, Overlay, Paper, rem, Stack, Text, Title } from "@mantine/core";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Github } from "lucide-react";
 import { Brand } from "shared/assets/Brand";
 import { Google } from "shared/assets/Google";
-import { useIsMobile } from "shared/hooks/useIsMobile";
-
-import { trpc } from "~router";
+import { useIsMobile } from "shared/hooks/use-is-mobile";
+import { trpc } from "shared/trpc";
 
 export const Route = createFileRoute("/login")({
     component: RouteComponent,
 });
 
 function RouteComponent() {
-    const [{ url }] = trpc.notary.getAuthUrl.useSuspenseQuery("google", {
+    const [{ url }] = trpc.session.authenticate.useSuspenseQuery("google", {
         refetchInterval: 5 * 1000, // 5 seconds
     });
 
@@ -25,15 +24,24 @@ function RouteComponent() {
     return (
         <Group>
             {isMobile && (
-                <Flex pos={"absolute"} top={0} left={0} h={rem(60)} w="100vw" bg={"var(--mantine-primary-color-filled)"} p='xs' justify={'center'}>
+                <Flex
+                    pos={"absolute"}
+                    top={0}
+                    left={0}
+                    h={rem(60)}
+                    w="100vw"
+                    bg={"var(--mantine-primary-color-filled)"}
+                    p="xs"
+                    justify={"center"}
+                >
                     <Brand />
                 </Flex>
             )}
             <Center h="100vh" flex={1} pos="relative">
                 <Paper radius="md" p="xl" withBorder shadow="lg" style={{ zIndex: 10e3 }}>
                     <Group wrap="nowrap" gap={4}>
-                        <Title order={3} textWrap="nowrap">
-                            Welcome to
+                        <Title order={3} textWrap="nowrap" c="text">
+                            Welcome back to
                         </Title>
                         <Text fz={"h3"} fw="bold" variant="gradient" gradient={{ from: "green", to: "cyan" }}>
                             DeskChart

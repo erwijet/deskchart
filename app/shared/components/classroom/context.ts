@@ -2,7 +2,7 @@ import { createFormContext } from "@mantine/form";
 import { z } from "zod";
 
 export const classroomSchema = z.object({
-    title: z.string(),
+    title: z.string().nonempty(),
     description: z.string(),
     students: z
         .object({

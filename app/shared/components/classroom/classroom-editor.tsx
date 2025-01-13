@@ -1,12 +1,12 @@
 import { ActionIcon, Button, Fieldset, Group, Input, Paper, SimpleGrid, Stack, Text, Textarea, TextInput, Title } from "@mantine/core";
-import { createFormContext, useField } from "@mantine/form";
+import { createFormContext } from "@mantine/form";
+import { useDebouncedValue } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { Pencil, Search, Trash, UserPlus2 } from "lucide-react";
-import { useClassroomFormContext } from "shared/components/classroom/context";
-import { useFormSubscription } from "shared/hooks/useFormSubscription";
-import { AnimatePresence, motion } from "motion/react";
-import { useDebouncedState, useDebouncedValue, useStateHistory } from "@mantine/hooks";
 import { useState } from "react";
+import { useClassroomFormContext } from "shared/components/classroom/context";
+import { useFormSubscription } from "shared/hooks/use-form-subscription";
+import { useIsMobile } from "shared/hooks/use-is-mobile";
 
 const [StudentFormProvider, useStudentFormContext, useStudentForm] = createFormContext<{ gn: string; sn: string }>();
 const StudentEditor = () => {
@@ -15,14 +15,15 @@ const StudentEditor = () => {
     useFormSubscription(form, "sn");
 
     return (
-        <Group>
-            <TextInput label="Firstname" {...form.getInputProps("gn")} />
-            <TextInput label="Lastname" {...form.getInputProps("sn")} />
-        </Group>
+        <Stack gap={"xs"}>
+            <TextInput w="100%" label="Firstname" {...form.getInputProps("gn")} />
+            <TextInput w="100%" label="Lastname" {...form.getInputProps("sn")} />
+        </Stack>
     );
 };
 
 export const ClassroomEditor = () => {
+    const { isMobile } = useIsMobile();
     const form = useClassroomFormContext();
     const students = useFormSubscription(form, "students");
     const studentForm = useStudentForm();
@@ -36,7 +37,7 @@ export const ClassroomEditor = () => {
                 <TextInput label="Title" {...form.getInputProps("title")} placeholder="Honors Precalculus" />
                 <Textarea label="Description" {...form.getInputProps("description")} placeholder="Got some additional thoughts?" />
             </Fieldset>
-            <Fieldset legend="Students">
+            <Fieldset legend={`Students (${students.length})`}>
                 <Stack>
                     <Group w="100%" justify="space-between">
                         <Input
@@ -72,81 +73,81 @@ export const ClassroomEditor = () => {
                             New Student
                         </Button>
                     </Group>
-                    <SimpleGrid cols={3}>
-                        <AnimatePresence>
-                            {students
-                                .filter(({ gn, sn }) =>
-                                    debouncedSearch.trim() == ""
-                                        ? true
-                                        : [gn, sn].some((sample) => sample.toLowerCase().includes(debouncedSearch.toLowerCase())),
-                                )
-                                .map((student, i) => (
-                                    <motion.div layout key={JSON.stringify({ student })}>
-                                        <Paper withBorder key={i} p="xs">
-                                            <Group justify="space-between">
-                                                <Group gap={3}>
-                                                    <Text>{student.gn}</Text>
-                                                    <Text fw="bold">{student.sn}</Text>
-                                                </Group>
-                                                <Group gap={"xs"}>
-                                                    <ActionIcon.Group>
-                                                        <ActionIcon
-                                                            variant="default"
-                                                            onClick={() => {
-                                                                studentForm.setFieldValue("gn", student.gn);
-                                                                studentForm.setFieldValue("sn", student.sn);
+                    <SimpleGrid cols={isMobile ? 1 : 3}>
+                        {students
+                            .filter(({ gn, sn }) =>
+                                debouncedSearch.trim() == ""
+                                    ? true
+                                    : [gn, sn].some((sample) => sample.toLowerCase().includes(debouncedSearch.toLowerCase())),
+                            )
+                            .map((student, i) => (
+                                <Paper withBorder key={i} p="xs">
+                                    <Group justify="space-between">
+                                        <Group gap={3}>
+                                            <Text>{student.gn}</Text>
+                                            <Text fw="bold">{student.sn}</Text>
+                                        </Group>
+                                        <Group gap={"xs"}>
+                                            <ActionIcon.Group>
+                                                <ActionIcon
+                                                    variant="default"
+                                                    onClick={() => {
+                                                        studentForm.setFieldValue("gn", student.gn);
+                                                        studentForm.setFieldValue("sn", student.sn);
 
-                                                                modals.openConfirmModal({
-                                                                    title: <Title order={5}>Edit Student</Title>,
-                                                                    children: (
-                                                                        <StudentFormProvider form={studentForm}>
-                                                                            <StudentEditor />
-                                                                        </StudentFormProvider>
+                                                        modals.openConfirmModal({
+                                                            title: <Title order={5}>Edit Student</Title>,
+                                                            children: (
+                                                                <StudentFormProvider form={studentForm}>
+                                                                    <StudentEditor />
+                                                                </StudentFormProvider>
+                                                            ),
+                                                            onConfirm() {
+                                                                form.setFieldValue("students", (students) =>
+                                                                    students.map((each, curI) =>
+                                                                        curI == i ? studentForm.getValues() : each,
                                                                     ),
-                                                                    onConfirm() {
-                                                                        form.setFieldValue("students", (students) =>
-                                                                            students.map((each, curI) =>
-                                                                                curI == i ? studentForm.getValues() : each,
-                                                                            ),
-                                                                        );
-                                                                    },
-                                                                    onClose() {
-                                                                        studentForm.reset();
-                                                                    },
-                                                                });
-                                                            }}
-                                                        >
-                                                            <Pencil size={16} />
-                                                        </ActionIcon>
-                                                        <ActionIcon
-                                                            variant="default"
-                                                            onClick={() =>
-                                                                modals.openConfirmModal({
-                                                                    title: <Title order={5}>Delete Student</Title>,
-                                                                    children: (
-                                                                        <Text>{`Are you sure you want to remove "${student.gn} ${student.sn}"?`}</Text>
-                                                                    ),
-                                                                    onConfirm() {
-                                                                        form.setFieldValue("students", (students) =>
-                                                                            students.filter((_, curI) => curI != i),
-                                                                        );
-                                                                    },
-                                                                    labels: {
-                                                                        confirm: "Remove",
-                                                                        cancel: "Cancel",
-                                                                    },
-                                                                })
-                                                            }
-                                                        >
-                                                            <Trash size={16} />
-                                                        </ActionIcon>
-                                                    </ActionIcon.Group>
-                                                </Group>
-                                            </Group>
-                                        </Paper>
-                                    </motion.div>
-                                ))}
-                        </AnimatePresence>
+                                                                );
+                                                            },
+                                                            onClose() {
+                                                                studentForm.reset();
+                                                            },
+                                                            labels: {
+                                                                confirm: "Save",
+                                                                cancel: "Cancel",
+                                                            },
+                                                        });
+                                                    }}
+                                                >
+                                                    <Pencil size={16} />
+                                                </ActionIcon>
+                                                <ActionIcon
+                                                    variant="default"
+                                                    onClick={() =>
+                                                        modals.openConfirmModal({
+                                                            title: <Title order={5}>Delete Student</Title>,
+                                                            children: (
+                                                                <Text>{`Are you sure you want to remove "${student.gn} ${student.sn}"?`}</Text>
+                                                            ),
+                                                            onConfirm() {
+                                                                form.setFieldValue("students", (students) =>
+                                                                    students.filter((_, curI) => curI != i),
+                                                                );
+                                                            },
+                                                            labels: {
+                                                                confirm: "Remove",
+                                                                cancel: "Cancel",
+                                                            },
+                                                        })
+                                                    }
+                                                >
+                                                    <Trash size={16} />
+                                                </ActionIcon>
+                                            </ActionIcon.Group>
+                                        </Group>
+                                    </Group>
+                                </Paper>
+                            ))}
                     </SimpleGrid>
                 </Stack>
             </Fieldset>

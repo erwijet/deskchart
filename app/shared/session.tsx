@@ -13,6 +13,7 @@ export const session = {
 export const SessionRenewer = () => {
     const { data } = trpc.session.renew.useQuery(void 0, {
         refetchInterval: 2 * 60 * 1000, // 2 minutes
+        refetchIntervalInBackground: true,
     });
 
     useEffect(() => {

@@ -1,7 +1,9 @@
 import { createFormContext } from "@mantine/form";
+import { randomId } from "@mantine/hooks";
 import { z } from "zod";
 
 const podSchema = z.object({
+    id: z.string(),
     title: z.string(),
     hex: z.string(),
 });
@@ -17,7 +19,7 @@ export const layoutSchema = z.object({
     pods: podSchema.array().default([]),
     seats: z
         .object({
-            flag: z.enum(["draft", "deleted"]).optional(),
+            id: z.string(),
             row: z.number().int(),
             col: z.number().int(),
             podId: z.string().cuid(),

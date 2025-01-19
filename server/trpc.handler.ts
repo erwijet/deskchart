@@ -66,7 +66,7 @@ const appRouter = t.router({
         byId: authenticated
             .input(z.string())
             .query(({ ctx: { userId: ownerId }, input: id }) =>
-                prisma.class.findFirst({ where: { id, ownerId }, include: { students: true } }).then(ensure.nonnull()),
+                prisma.class.findFirst({ where: { id, ownerId }, include: { students: true, layouts: true } }).then(ensure.nonnull()),
             ),
         create: authenticated
             .input(z.object({ title: z.string(), description: z.string(), students: z.object({ gn: z.string(), sn: z.string() }).array() }))

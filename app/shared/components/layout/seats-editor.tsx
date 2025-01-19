@@ -9,31 +9,33 @@ import { useLayoutFormContext } from "shared/components/layout/context";
 
 const gridSpacing = 10;
 
-// const initialNodes = [
-//     {
-//         id: "1",
-//         type: "resizableNode",
-//         data: { hex: "#8cabaa", flag: undefined, podId: "" },
-//         position: { x: 100, y: 100 },
-//         draggable: true,
-//     },
-//     {
-//         id: "2",
-//         type: "resizableNode",
-//         data: { hex: "#8cabaa", flag: undefined, podId: "" },
-//         position: { x: 60, y: 60 },
-//         draggable: true,
-//     },
-// ];
-
 export const SeatsEditor = () => {
     const form = useLayoutFormContext();
-    const [nodes, , onNodesChanged] = useNodesState([]);
+    const [nodes, setNodes, onNodesChanged] = useNodesState([]);
+
+    form.watch("seats", (seats) => {
+        if (JSON.stringify(seats.previousValue) == JSON.stringify(seats.value)) return;
+
+        setNodes(
+            seats.value.map((seat) => ({
+                id: seat.id,
+                type: "resizableNode",
+                data: { hex: form.values.pods.find((it) => it.id == seat.podId)!.hex, podId: seat.podId },
+                position: { x: seat.row, y: seat.col },
+            })),
+        );
+    });
 
     useEffect(() => {
         form.setFieldValue(
             "seats",
-            nodes.map((node) => ({ row: node.position.x, col: node.position.y, flag: node.data.flag, podId: node.data.podId })),
+            nodes.map((node) => ({
+                id: node.id,
+                row: node.position.x,
+                col: node.position.y,
+                flag: node.data.flag,
+                podId: node.data.podId,
+            })),
         );
     }, [JSON.stringify(nodes)]);
 

@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { LayoutFormProvider, useLayoutForm, usePodForm } from "shared/components/layout/context";
 import { SeatsEditor } from "shared/components/layout/seats-editor";
+import { randomId } from "@mantine/hooks";
 
 export const LayoutEditor = (props: { layoutId: string }) => {
     const [layout] = trpc.layout.byId.useSuspenseQuery(props.layoutId);
@@ -48,7 +49,20 @@ export const LayoutEditor = (props: { layoutId: string }) => {
                                 </>
                             )}
                             {form.values.pods.map((pod) => (
-                                <Menu.Item key={pod.title}>{pod.title}</Menu.Item>
+                                <Menu.Item
+                                    key={pod.title}
+                                    onClick={() => {
+                                        const o = {
+                                            id: randomId("seat-"),
+                                            row: 5,
+                                            col: 5,
+                                            podId: pod.id,
+                                        };
+                                        form.setFieldValue("seats", (p) => p.concat([o]));
+                                    }}
+                                >
+                                    {pod.title}
+                                </Menu.Item>
                             ))}
                         </Menu.Dropdown>
                     </Menu>
@@ -59,12 +73,13 @@ export const LayoutEditor = (props: { layoutId: string }) => {
     );
 };
 
-const PodEditor = (props: { onConfirm: (data: { title: string; hex: string }) => unknown }) => {
+const PodEditor = (props: { onConfirm: (data: { id: string; title: string; hex: string }) => unknown }) => {
     const form = usePodForm({ validate: zodResolver(z.object({ title: z.string().nonempty(), hex: z.string().nonempty() })) });
 
     function handleConfirm() {
         if (form.validate().hasErrors) return;
-        props.onConfirm(form.getValues());
+        modals.closeAll();
+        props.onConfirm({ ...form.getValues(), id: randomId("pod-") });
     }
 
     return (

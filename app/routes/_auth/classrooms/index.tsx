@@ -1,6 +1,6 @@
-import { Badge, Button, Group, Paper, Stack, Text } from "@mantine/core";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { ActionIcon, Badge, Button, Group, Menu, Paper, Stack, Text } from "@mantine/core";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Edit, LayoutDashboard, MoreHorizontal, Plus, Trash2 } from "lucide-react";
 import { Content } from "shared/components/content";
 import { logger } from "shared/logger";
 import { pluralize } from "shared/str";
@@ -15,6 +15,7 @@ export const Route = createFileRoute("/_auth/classrooms/")({
 
 function RouteComponent() {
     const [classrooms] = trpc.classroom.list.useSuspenseQuery();
+    const nav = useNavigate();
 
     return (
         <Content title="My Classrooms">
@@ -28,23 +29,43 @@ function RouteComponent() {
 
             <Stack>
                 {classrooms.map(({ id, ...classroom }) => (
-                    <Link to="/classrooms/$id/deskplans" params={{ id }} key={id}>
-                        <Paper withBorder shadow="lg" p="md">
-                            <Group justify="space-between">
-                                <div>
+                    <Paper withBorder shadow="lg" p="md" key={id}>
+                        <Group justify="space-between">
+                            <div>
+                                <Group>
                                     <Text size="xl" fw="light">
                                         {classroom.title}
                                     </Text>
-                                    <Text size="sm" c="dimmed">
-                                        {classroom.description}
-                                    </Text>
-                                </div>
-                                <Group>
-                                    <Badge>{pluralize(classroom.students.length, "student")}</Badge>
+                                    <Badge variant="light">{pluralize(classroom.students.length, "student")}</Badge>
                                 </Group>
-                            </Group>
-                        </Paper>
-                    </Link>
+                                <Text size="sm" c="dimmed">
+                                    {classroom.description}
+                                </Text>
+                            </div>
+                            <Menu>
+                                <Menu.Target>
+                                    <ActionIcon variant="transparent" onClick={(e) => e.preventDefault()}>
+                                        <MoreHorizontal />
+                                    </ActionIcon>
+                                </Menu.Target>
+                                <Menu.Dropdown>
+                                    <Menu.Item
+                                        leftSection={<Edit size={16} />}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            void nav({ to: "/classrooms/$id/edit", params: { id } });
+                                        }}
+                                    >
+                                        Edit Classroom
+                                    </Menu.Item>
+                                    <Menu.Item leftSection={<LayoutDashboard size={16} />}>Create Layout</Menu.Item>
+                                    <Menu.Item color="red" leftSection={<Trash2 size={16} />}>
+                                        Delete
+                                    </Menu.Item>
+                                </Menu.Dropdown>
+                            </Menu>
+                        </Group>
+                    </Paper>
                 ))}
             </Stack>
         </Content>

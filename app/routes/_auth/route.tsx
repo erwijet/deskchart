@@ -1,7 +1,7 @@
 import { AppShell, Box, Burger, Group, Loader, rem, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { Navbar } from "shared/components/navbar";
+import { Sidebar } from "shared/components/sidebar";
 import { Suspense } from "react";
 import { Brand } from "shared/assets/Brand";
 import { useIsMobile } from "shared/hooks/use-is-mobile";
@@ -51,7 +51,7 @@ function Component() {
                 </Group>
             </AppShell.Header>
             <AppShell.Navbar style={{ width: rem(80) }}>
-                <Navbar />
+                <Sidebar />
             </AppShell.Navbar>
             <AppShell.Main>
                 <Suspense

@@ -1,18 +1,18 @@
 import { Stack, Tooltip, UnstyledButton } from "@mantine/core";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import classes from "components/navbar/navbar.module.css";
+import classes from "components/sidebar/sidebar.module.css";
 import { Grid3X3, LogOut, School, Settings } from "lucide-react";
 import { Brand } from "../../assets/Brand";
 import { useIsMobile } from "shared/hooks/use-is-mobile";
 
-interface NavbarLinkProps {
+interface SidebarLinkProps {
     icon: typeof School;
     label: string;
     active?: boolean;
     onClick?: () => void;
 }
 
-function NavbarLink({ icon: Icon, label, active, onClick }: NavbarLinkProps) {
+function SidebarLink({ icon: Icon, label, active, onClick }: SidebarLinkProps) {
     return (
         <Tooltip label={label} position="right" transitionProps={{ duration: 0 }}>
             <UnstyledButton onClick={onClick} className={classes.link} data-active={active || undefined}>
@@ -28,13 +28,13 @@ const routes = [
     { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
-export const Navbar = () => {
+export const Sidebar = () => {
     const { location } = useRouterState();
     const { isMobile } = useIsMobile();
     const navigate = useNavigate();
 
     const links = routes.map((link) => (
-        <NavbarLink
+        <SidebarLink
             {...link}
             key={link.label}
             active={location.pathname.startsWith(link.path)}
@@ -43,13 +43,13 @@ export const Navbar = () => {
     ));
 
     return (
-        <nav className={classes.navbar}>
+        <nav className={classes.sidebar}>
             {!isMobile && (
                 <Link to="/">
                     <Brand />
                 </Link>
             )}
-            <div className={classes.navbarMain}>
+            <div className={classes.sidebarMain}>
                 <Stack justify="center" gap={0}>
                     {links}
                 </Stack>
@@ -57,7 +57,7 @@ export const Navbar = () => {
 
             <Stack justify="center" gap={0}>
                 <Link to="/logout">
-                    <NavbarLink icon={LogOut} label="Logout" />
+                    <SidebarLink icon={LogOut} label="Logout" />
                 </Link>
             </Stack>
         </nav>

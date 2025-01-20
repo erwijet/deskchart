@@ -1,4 +1,4 @@
-import { Badge, createTheme, Loader, Title } from "@mantine/core";
+import { Badge, Button, createTheme, Loader, Title } from "@mantine/core";
 
 export const theme = createTheme({
     primaryColor: "green",
@@ -14,6 +14,11 @@ export const theme = createTheme({
         Badge: Badge.extend({
             defaultProps: {
                 radius: "sm",
+            },
+        }),
+        Button: Button.extend({
+            defaultProps: {
+                size: "compact-md",
             },
         }),
         Loader: Loader.extend({

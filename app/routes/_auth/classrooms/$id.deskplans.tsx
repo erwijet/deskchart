@@ -46,8 +46,6 @@ function RouteComponent() {
     const { id } = useParams({ from: "/_auth/classrooms/$id/deskplans" });
     const [layouts, { refetch }] = trpc.layout.byClassroom.useSuspenseQuery(id);
     const [classroom] = trpc.classroom.byId.useSuspenseQuery(id);
-    const { mutateAsync: createLayout, isPending: isCreatePending } = trpc.layout.create.useMutation();
-    const { mutateAsync: deleteLayout } = trpc.layout.delete.useMutation();
 
     const [tab, setTab] = useState(layouts.at(0)?.id ?? null);
     function handleOnTabChange(tab: string | null) {

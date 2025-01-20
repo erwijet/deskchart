@@ -1,5 +1,5 @@
 import { createNotary, Notary } from "@erwijet/notary";
-import { PrismaClient } from "@prisma/client";
+import { $Enums, PrismaClient } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { TRPC_ERROR_CODE_KEY } from "@trpc/server/dist/rpc";
@@ -20,15 +20,16 @@ const t = initTRPC.context<{ token: string }>().create();
 
 const ensure = {
     nonnull<T>(): (t: T) => NonNullable<T> {
-        return (t: T) => {
-            if (!!t) return t;
-            throw new TRPCError({ code: "NOT_FOUND" });
-        };
+        return (t: T) => t ?? fail("NOT_FOUND");
     },
 };
 
-function orThrow<T>(code: TRPC_ERROR_CODE_KEY): T {
+function fail<T>(code: TRPC_ERROR_CODE_KEY): NonNullable<T> {
     throw new TRPCError({ code });
+}
+
+function ok() {
+    return { ok: true };
 }
 
 function createNotaryTrpcAuthenticationPlugin({ notary }: { notary: Notary }) {
@@ -36,7 +37,6 @@ function createNotaryTrpcAuthenticationPlugin({ notary }: { notary: Notary }) {
 
     return t.procedure.use(async ({ ctx: { token }, next }) => {
         const auth = await runCatching(() => notary.inspect(token));
-        if (!auth) throw new TRPCError({ code: "UNAUTHORIZED" });
 
         if (!auth?.valid) throw new TRPCError({ code: "UNAUTHORIZED" });
 
@@ -61,68 +61,172 @@ const appRouter = t.router({
     },
     classroom: {
         list: authenticated.query(({ ctx: { userId: ownerId } }) =>
-            prisma.class.findMany({ where: { ownerId }, include: { students: true } }),
+            prisma.classroom.findMany({ where: { ownerId }, include: { sections: true } }),
         ),
-        byId: authenticated
-            .input(z.string())
-            .query(({ ctx: { userId: ownerId }, input: id }) =>
-                prisma.class.findFirst({ where: { id, ownerId }, include: { students: true, layouts: true } }).then(ensure.nonnull()),
-            ),
+        details: authenticated.input(z.string()).query(({ ctx: { userId: ownerId }, input: id }) =>
+            prisma.classroom
+                .findFirst({
+                    where: { ownerId, id },
+                    include: { pods: { include: { seats: true } }, sections: { include: { students: true } } },
+                })
+                .then(ensure.nonnull()),
+        ),
         create: authenticated
-            .input(z.object({ title: z.string(), description: z.string(), students: z.object({ gn: z.string(), sn: z.string() }).array() }))
-            .mutation(({ ctx: { userId: ownerId }, input: { title, description, students } }) =>
-                prisma.class.create({
-                    data: {
-                        ownerId,
-                        title,
-                        description,
-                        students: { createMany: { data: students.map((each) => ({ ...each, ownerId })) } },
-                    },
+            .input(z.object({ title: z.string() }))
+            .mutation(({ ctx: { userId: ownerId }, input }) => prisma.classroom.create({ data: { ownerId, ...input } })),
+        settings: {
+            save: authenticated
+                .input(
+                    z.object({
+                        id: z.string(),
+                        title: z.string(),
+                    }),
+                )
+                .mutation(({ ctx: { userId: ownerId }, input: { id, ...data } }) =>
+                    prisma.classroom.update({ where: { id, ownerId }, data }),
+                ),
+        },
+        setDetails: authenticated
+            .input(
+                z.object({
+                    id: z.string(),
+                    title: z.string(),
+                    pods: z
+                        .object({
+                            title: z.string(),
+                            hex: z.string(),
+                            seats: z
+                                .object({
+                                    col: z.number(),
+                                    row: z.number(),
+                                })
+                                .array(),
+                        })
+                        .array(),
+                    entities: z
+                        .object({
+                            type: z.nativeEnum($Enums.EntityType),
+                            dir: z.nativeEnum($Enums.NodeDirection),
+                            col: z.number(),
+                            row: z.number(),
+                        })
+                        .array(),
                 }),
-            ),
-    },
-    layout: {
-        byId: authenticated
-            .input(z.string().cuid())
-            .query(({ ctx: { userId: ownerId }, input: id }) =>
-                prisma.layout
-                    .findFirst({ where: { id, class: { ownerId } }, include: { class: true, pods: { include: { seats: true } } } })
-                    .then(ensure.nonnull()),
-            ),
-        create: authenticated
-            .input(z.object({ title: z.string(), classId: z.string().cuid() }))
-            .mutation(({ ctx: { userId: ownerId }, input: { title, classId } }) =>
-                prisma.class
-                    .findFirstOrThrow({ where: { id: classId, ownerId } })
-                    .then(ensure.nonnull())
-                    .then(() =>
-                        prisma.layout.create({
-                            data: {
-                                title,
-                                classId,
-                                height: 0,
-                                width: 0,
-                            },
-                        }),
-                    )
+            )
+            .mutation(({ ctx: { userId: ownerId }, input: { id, title, pods, entities } }) => {
+                prisma.classroom.update({
+                    where: { id, ownerId },
+                    include: { pods: true },
+                    data: {
+                        title,
+                        entities: { create: entities },
+                        pods: {
+                            create: pods.map((p) => ({ ...p, seats: { create: p.seats } })),
+                        },
+                    },
+                });
 
-                    .catch(() => orThrow("CONFLICT")),
-            ),
-        update: authenticated
-            .input(z.object({ id: z.string().cuid(), title: z.string(), description: z.string().optional().default("") }))
-            .mutation(({ ctx: { userId: ownerId }, input: { id, title } }) =>
-                prisma.layout.update({ where: { id, class: { ownerId } }, data: { title } }),
-            ),
+                return ok();
+            }),
+        setSections: authenticated
+            .input(
+                z.object({
+                    id: z.string(),
+                    sections: z.object({ title: z.string(), students: z.object({ gn: z.string(), sn: z.string() }).array() }).array(),
+                }),
+            )
+            .mutation(async ({ ctx: { userId: ownerId }, input: { id, sections } }) => {
+                const classroom = await prisma.classroom.findFirst({ where: { id, ownerId } }).then(ensure.nonnull());
+
+                await prisma.$transaction(
+                    [
+                        prisma.section.deleteMany({ where: { classId: classroom.id } }),
+                        ...sections.map((section) =>
+                            prisma.section.create({
+                                data: {
+                                    title: section.title,
+                                    classId: classroom.id,
+                                    students: {
+                                        create: section.students.map((student) => ({ ownerId, ...student })),
+                                    },
+                                },
+                            }),
+                        ),
+                    ],
+                    { isolationLevel: "ReadCommitted" },
+                );
+
+                return ok();
+            }),
         delete: authenticated
-            .input(z.string().cuid())
-            .mutation(({ ctx: { userId: ownerId }, input: id }) => prisma.layout.delete({ where: { id, class: { ownerId } } })),
-        byClassroom: authenticated.input(z.string()).query(({ ctx: { userId: ownerId }, input: id }) =>
-            prisma.class
-                .findFirst({ where: { id, ownerId }, include: { layouts: true } })
-                .then(ensure.nonnull())
-                .then(({ layouts }) => layouts),
-        ),
+            .input(z.string())
+            .mutation(({ ctx: { userId: ownerId }, input: id }) => prisma.classroom.delete({ where: { id, ownerId } })),
     },
+
+    // classroom: {
+    //     list: authenticated.query(({ ctx: { userId: ownerId } }) =>
+    //         prisma.class.findMany({ where: { ownerId }, include: { students: true } }),
+    //     ),
+    //     byId: authenticated
+    //         .input(z.string())
+    //         .query(({ ctx: { userId: ownerId }, input: id }) =>
+    //             prisma.class.findFirst({ where: { id, ownerId }, include: { students: true, layouts: true } }).then(ensure.nonnull()),
+    //         ),
+    //     create: authenticated
+    //         .input(z.object({ title: z.string(), description: z.string(), students: z.object({ gn: z.string(), sn: z.string() }).array() }))
+    //         .mutation(({ ctx: { userId: ownerId }, input: { title, description, students } }) =>
+    //             prisma.class.create({
+    //                 data: {
+    //                     ownerId,
+    //                     title,
+    //                     description,
+    //                     students: { createMany: { data: students.map((each) => ({ ...each, ownerId })) } },
+    //                 },
+    //             }),
+    //         ),
+    // },
+    // layout: {
+    //     byId: authenticated
+    //         .input(z.string().cuid())
+    //         .query(({ ctx: { userId: ownerId }, input: id }) =>
+    //             prisma.layout
+    //                 .findFirst({ where: { id, class: { ownerId } }, include: { class: true, pods: { include: { seats: true } } } })
+    //                 .then(ensure.nonnull()),
+    //         ),
+    //     create: authenticated
+    //         .input(z.object({ title: z.string(), classId: z.string().cuid() }))
+    //         .mutation(({ ctx: { userId: ownerId }, input: { title, classId } }) =>
+    //             prisma.class
+    //                 .findFirstOrThrow({ where: { id: classId, ownerId } })
+    //                 .then(ensure.nonnull())
+    //                 .then(() =>
+    //                     prisma.layout.create({
+    //                         data: {
+    //                             title,
+    //                             classId,
+    //                             height: 0,
+    //                             width: 0,
+    //                         },
+    //                     }),
+    //                 )
+
+    //                 .catch(() => orThrow("CONFLICT")),
+    //         ),
+    //     update: authenticated
+    //         .input(z.object({ id: z.string().cuid(), title: z.string(), description: z.string().optional().default("") }))
+    //         .mutation(({ ctx: { userId: ownerId }, input: { id, title } }) =>
+    //             prisma.layout.update({ where: { id, class: { ownerId } }, data: { title } }),
+    //         ),
+    //     delete: authenticated
+    //         .input(z.string().cuid())
+    //         .mutation(({ ctx: { userId: ownerId }, input: id }) => prisma.layout.delete({ where: { id, class: { ownerId } } })),
+    //     byClassroom: authenticated.input(z.string()).query(({ ctx: { userId: ownerId }, input: id }) =>
+    //         prisma.class
+    //             .findFirst({ where: { id, ownerId }, include: { layouts: true } })
+    //             .then(ensure.nonnull())
+    //             .then(({ layouts }) => layouts),
+    //     ),
+    // },
 });
 
 export type AppRouter = typeof appRouter;

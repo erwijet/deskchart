@@ -18,7 +18,7 @@ function RouteComponent() {
     const { mutateAsync: createClassroom, isPending } = trpc.classroom.create.useMutation();
 
     const form = useClassroomForm({
-        initialValues: { title: "", description: "", students: [] },
+        initialValues: { title: "" },
         validate: zodResolver(classroomSchema),
     });
 

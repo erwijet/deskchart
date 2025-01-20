@@ -5,12 +5,12 @@ import { useEffect, useMemo } from "react";
 import ReactFlow, { Background, useNodesState } from "reactflow";
 
 import { Paper } from "@mantine/core";
-import { useLayoutFormContext } from "shared/components/layout/context";
+import { useClassroomFormContext } from "../classroom/context";
 
 const gridSpacing = 10;
 
 export const SeatsEditor = () => {
-    const form = useLayoutFormContext();
+    const form = useClassroomFormContext();
     const [nodes, setNodes, onNodesChanged] = useNodesState([]);
 
     form.watch("seats", (seats) => {

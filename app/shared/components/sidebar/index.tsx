@@ -1,7 +1,7 @@
 import { Stack, Tooltip, UnstyledButton } from "@mantine/core";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import classes from "components/sidebar/sidebar.module.css";
-import { Grid3X3, LogOut, School, Settings } from "lucide-react";
+import { LogOut, School, Settings } from "lucide-react";
 import { Brand } from "../../assets/Brand";
 import { useIsMobile } from "shared/hooks/use-is-mobile";
 
@@ -24,7 +24,6 @@ function SidebarLink({ icon: Icon, label, active, onClick }: SidebarLinkProps) {
 
 const routes = [
     { icon: School, label: "Classrooms", path: "/classrooms" },
-    { icon: Grid3X3, label: "Desk Plans", path: "/deskplans" },
     { icon: Settings, label: "Settings", path: "/settings" },
 ];
 

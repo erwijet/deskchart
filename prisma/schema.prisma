@@ -8,34 +8,27 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Class {
-    id          String @id @default(cuid())
-    title       String
-    description String
+model Classroom {
+    id    String @id @default(cuid())
+    title String
 
     ownerId   String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    students Student[]
-    layouts  Layout[]
+    pods     Pod[]
+    entities Entity[]
+
+    sections Section[]
 }
 
-model Layout {
+model Section {
     id    String @id @default(cuid())
     title String
 
-    classId String
-    class   Class  @relation(fields: [classId], references: [id])
-
-    height Int
-    width  Int
-    pods   Pod[]
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@unique([title, classId])
+    students  Student[]
+    classroom Classroom @relation(fields: [classId], references: [id])
+    classId   String
 }
 
 model Pod {
@@ -45,8 +38,26 @@ model Pod {
 
     seats Seat[]
 
-    layoutId String
-    layout   Layout @relation(fields: [layoutId], references: [id])
+    classroomId String
+    classroom   Classroom @relation(fields: [classroomId], references: [id])
+}
+
+model Entity {
+    id  String @id @default(cuid())
+    row Int
+    col Int
+
+    type EntityType
+    dir  NodeDirection
+
+    Classroom   Classroom @relation(fields: [classroomId], references: [id])
+    classroomId String
+}
+
+enum EntityType {
+    WHITEBOARD
+    TEACHER
+    DOOR
 }
 
 model Seat {
@@ -58,26 +69,32 @@ model Seat {
     pod   Pod    @relation(fields: [podId], references: [id])
 }
 
+model Accommodation {
+    id String @id @default(cuid())
+
+    fixedSeatId        String?
+    noContactStudentId String?
+
+    Student   Student @relation(fields: [studentId], references: [id])
+    studentId String
+}
+
 model Student {
     id String @id @default(cuid())
     gn String
     sn String
 
-    classId String
-    class   Class  @relation(fields: [classId], references: [id])
-
     ownerId   String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    accommodations Accommodation[]
+
+    Section   Section @relation(fields: [sectionId], references: [id])
+    sectionId String
 }
 
-// model Post {
-//     id        Int      @id @default(autoincrement())
-//     name      String
-//     createdAt DateTime @default(now())
-//     updatedAt DateTime @updatedAt
-
-//     createdById String
-
-//     @@index([name])
-// }
+enum NodeDirection {
+    VERTICAL
+    HORIZONTAL
+}

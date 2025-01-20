@@ -27,7 +27,7 @@ function RouteComponent() {
         if (hasErrors) return;
 
         createClassroom({ ...form.getValues() })
-            .then(({ id }) => navigate({ to: "/classrooms/edit/$id", params: { id } }))
+            .then(({ id }) => navigate({ to: "/classrooms/$id/edit", params: { id } }))
             .catch(logger.error);
     }
 

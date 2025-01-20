@@ -37,9 +37,6 @@ function RouteComponent() {
             </ClassroomFormProvider>
 
             <Divider label={<Title order={3}>Layouts</Title>} labelPosition="left" my="md" />
-            <Group justify="flex-end">
-                <Button leftSection={<Plus size={16} />}>Create Layout</Button>
-            </Group>
 
             <Table>
                 <Table.Tbody>

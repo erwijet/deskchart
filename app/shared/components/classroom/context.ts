@@ -25,5 +25,5 @@ export const classroomSchema = z.object({
         .array(),
 });
 
-type ClassroomState = z.infer<typeof classroomSchema>;
+export type ClassroomState = z.infer<typeof classroomSchema>;
 export const [ClassroomFormProvider, useClassroomFormContext, useClassroomForm] = createFormContext<ClassroomState>();

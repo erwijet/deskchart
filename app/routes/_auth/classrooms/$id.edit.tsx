@@ -2,15 +2,14 @@ import { Drawer, Text, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
-import { Cog, Component, Trash2 } from "lucide-react";
+import { Cog, Trash2 } from "lucide-react";
 import { ClassroomEditor } from "shared/components/classroom/classroom-editor";
-import { ClassroomFormProvider, useClassroomForm } from "shared/components/classroom/context";
+import { ClassroomFormProvider, ClassroomState, useClassroomForm } from "shared/components/classroom/context";
 import { Content } from "shared/components/content";
 import { LayoutEditor } from "shared/components/layout/layout-editor";
 import { SplitButton } from "shared/components/split-button";
 import { runVoiding } from "shared/fns";
 import { logger } from "shared/logger";
-
 import { trpc } from "shared/trpc";
 
 function RouteComponent() {
@@ -31,10 +30,11 @@ function RouteComponent() {
         },
     });
 
-    function handleSaveSettings(data: { title: string }) {
+    function handleSaveSettings(data: ClassroomState) {
         saveSettings({ id, ...data })
             .then(runVoiding(refetch))
-            .then(close);
+            .then(close)
+            .catch(logger.error);
     }
 
     function handleDelete() {
@@ -63,15 +63,14 @@ function RouteComponent() {
                 <Content.Action>
                     <SplitButton
                         menu={{
-                            "Edit Pods": { fn: () => {}, icon: <Component size={16} /> },
                             Settings: { fn: () => open(), icon: <Cog size={16} /> },
                         }}
                     >
-                        Save
+                        Save Layout
                     </SplitButton>
                 </Content.Action>
 
-                <Drawer opened={opened} onClose={close} position="right" title={<Title order={3}>Settings</Title>}>
+                <Drawer opened={opened} onClose={close} position="right" title={<Title order={3}>Settings</Title>} closeOnEscape={false}>
                     <ClassroomEditor onDelete={handleDelete} onSave={handleSaveSettings} />
                 </Drawer>
 

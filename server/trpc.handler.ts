@@ -80,10 +80,27 @@ const appRouter = t.router({
                     z.object({
                         id: z.string(),
                         title: z.string(),
+                        pods: z
+                            .object({
+                                id: z.string(),
+                                title: z.string(),
+                                hex: z.string(),
+                            })
+                            .array(),
                     }),
                 )
-                .mutation(({ ctx: { userId: ownerId }, input: { id, ...data } }) =>
-                    prisma.classroom.update({ where: { id, ownerId }, data }),
+                .mutation(async ({ ctx: { userId: ownerId }, input: { id, title, pods } }) =>
+                    prisma.classroom.update({
+                        where: { id, ownerId },
+                        include: { pods: true },
+                        data: {
+                            title,
+                            pods: {
+                                deleteMany: {},
+                                createMany: { data: pods },
+                            },
+                        },
+                    }),
                 ),
         },
         setDetails: authenticated

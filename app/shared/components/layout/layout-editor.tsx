@@ -1,7 +1,6 @@
-import { Button, ColorInput, Divider, Group, Menu, Stack, TextInput, Title } from "@mantine/core";
+import { Button, ColorInput, Divider, Group, Menu, Stack, TextInput } from "@mantine/core";
 import { zodResolver } from "@mantine/form";
 import { modals } from "@mantine/modals";
-import { ChevronDown, Group as GroupIcon } from "lucide-react";
 import { z } from "zod";
 import { randomId } from "@mantine/hooks";
 import { SeatsEditor } from "shared/components/layout/seats-editor";

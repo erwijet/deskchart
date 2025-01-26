@@ -28,6 +28,9 @@
     "@trpc/client": "11.0.0-rc.660",
     "@trpc/react-query": "11.0.0-rc.660",
     "@trpc/server": "11.0.0-rc.660",
+    "color": "^4.2.3",
+    "colord": "^2.9.3",
+    "cuid": "^3.0.0",
     "lucide-react": "^0.469.0",
     "motion": "^11.15.0",
     "react": "^18.2.0",
@@ -38,6 +41,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/color": "^4.2.0",
     "@types/react": "^18.2.47",
     "@types/react-dom": "^18.2.18",
     "@types/react-resizable": "^3.0.8",

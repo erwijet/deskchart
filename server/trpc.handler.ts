@@ -38,7 +38,7 @@ function createNotaryTrpcAuthenticationPlugin({ notary }: { notary: Notary }) {
     return t.procedure.use(async ({ ctx: { token }, next }) => {
         const auth = await runCatching(() => notary.inspect(token));
 
-        if (!auth?.valid) throw new TRPCError({ code: "UNAUTHORIZED" });
+        if (!auth?.valid) throw fail("UNAUTHORIZED");
 
         return next({
             ctx: {

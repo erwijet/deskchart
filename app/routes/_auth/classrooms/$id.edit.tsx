@@ -1,4 +1,4 @@
-import { Drawer, Text, Title } from "@mantine/core";
+import { ActionIcon, Group, Box, Button, Drawer, rem, Text, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
@@ -10,6 +10,7 @@ import { LayoutEditor } from "shared/components/layout/layout-editor";
 import { SplitButton } from "shared/components/split-button";
 import { runVoiding } from "shared/fns";
 import { logger } from "shared/logger";
+import { createCuid } from "shared/str";
 import { trpc } from "shared/trpc";
 
 function RouteComponent() {
@@ -55,15 +56,26 @@ function RouteComponent() {
         });
     }
 
+    function handleAddSeat() {
+        form.setFieldValue("seats", (prev) =>
+            prev.concat([{ id: createCuid(), col: 10, row: 10, podId: form.getValues().pods.at(0)!.id }]),
+        );
+    }
+
     const [opened, { open, close }] = useDisclosure(false);
 
     return (
         <ClassroomFormProvider form={form}>
             <Content withBack title={classroom.title}>
                 <Content.Action>
+                    <Button variant="default" onClick={handleAddSeat}>
+                        Add Seat
+                    </Button>
+                </Content.Action>
+                <Content.Action>
                     <SplitButton
                         menu={{
-                            Settings: { fn: () => open(), icon: <Cog size={16} /> },
+                            Settings: { fn: open, icon: <Cog size={16} /> },
                         }}
                     >
                         Save Layout

@@ -13,7 +13,7 @@ export const theme = createTheme({
         }),
         Button: Button.extend({
             defaultProps: {
-                size: "compact-md",
+                size: "sm",
             },
         }),
         Loader: Loader.extend({

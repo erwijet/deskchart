@@ -51,7 +51,7 @@ function RouteComponent() {
                     <Divider label="continue with" labelPosition="center" my="sm" />
 
                     <Group>
-                        <Button variant="default" w="100%" leftSection={<Google />} onClick={handleOAuthGoogle}>
+                        <Button variant="default" size="md" w="100%" leftSection={<Google />} onClick={handleOAuthGoogle}>
                             Google
                         </Button>
                     </Group>

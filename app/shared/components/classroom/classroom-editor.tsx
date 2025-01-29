@@ -1,13 +1,12 @@
 import { ActionIcon, Button, Divider, Group, Paper, SimpleGrid, Stack, Text, TextInput, Title } from "@mantine/core";
-import { randomId } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { colord, extend } from "colord";
 import names from "colord/plugins/names";
 import { Edit, Trash2 } from "lucide-react";
 import { createRandomColor } from "shared/color";
-import { ClassroomState, PodFormProvider, useClassroomFormContext, usePodForm } from "shared/components/classroom/context";
+import { ClassroomState, PodFormProvider, useClassroomFormContext, usePodForm } from "components/classroom/context";
 import { createCuid, titlecase } from "shared/str";
-import { PodEditor } from "./pod-editor";
+import { PodEditor } from "components/classroom/pod-editor";
 import { motion } from "motion/react";
 
 extend([names]);

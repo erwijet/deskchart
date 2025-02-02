@@ -1,4 +1,4 @@
-import { ActionIcon, Group, Box, Button, Drawer, rem, Text, Title } from "@mantine/core";
+import { Button, Drawer, Text, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
@@ -27,7 +27,7 @@ function RouteComponent() {
             width: 0,
             title: classroom.title,
             pods: classroom.pods,
-            seats: classroom.pods.flatMap((p) => p.seats),
+            nodes: [],
         },
     });
 
@@ -57,8 +57,21 @@ function RouteComponent() {
     }
 
     function handleAddSeat() {
-        form.setFieldValue("seats", (prev) =>
+        form.setFieldValue("nodes", (prev) =>
             prev.concat([{ id: createCuid(), col: 10, row: 10, podId: form.getValues().pods.at(0)!.id }]),
+        );
+    }
+
+    function handleAddWhiteboard() {
+        form.setFieldValue("nodes", (prev) =>
+            prev.concat([
+                {
+                    id: createCuid(),
+                    col: 10,
+                    row: 10,
+                    entityType: "WHITEBOARD",
+                },
+            ]),
         );
     }
 
@@ -67,6 +80,11 @@ function RouteComponent() {
     return (
         <ClassroomFormProvider form={form}>
             <Content withBack title={classroom.title}>
+                <Content.Action>
+                    <Button variant="default" onClick={handleAddWhiteboard}>
+                        Add Whiteboard
+                    </Button>
+                </Content.Action>
                 <Content.Action>
                     <Button variant="default" onClick={handleAddSeat}>
                         Add Seat

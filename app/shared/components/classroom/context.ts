@@ -1,4 +1,5 @@
 import { createFormContext } from "@mantine/form";
+import { EntityType } from "@prisma/client";
 import { z } from "zod";
 
 const podSchema = z.object({
@@ -15,12 +16,14 @@ export const classroomSchema = z.object({
     height: z.number().int(),
     width: z.number().int(),
     pods: podSchema.array().default([]),
-    seats: z
+    nodes: z
         .object({
             id: z.string(),
             row: z.number().int(),
             col: z.number().int(),
-            podId: z.string().cuid(),
+
+            entityType: z.nativeEnum(EntityType).optional(),
+            podId: z.string().cuid().optional(),
         })
         .array(),
 });

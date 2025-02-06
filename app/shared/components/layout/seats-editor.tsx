@@ -11,6 +11,7 @@ import { useFormSubscription } from "shared/hooks/use-form-subscription";
 import { useUndo } from "shared/hooks/use-undo";
 import { createCuid } from "shared/str";
 import { useClassroomFormContext } from "../classroom/context";
+import { arr } from "shared/fns";
 
 const gridSpacing = 10;
 
@@ -33,9 +34,7 @@ export const SeatsEditor = () => {
     ]);
 
     form.watch("nodes", (update) => {
-        console.log("got form update...");
         if (JSON.stringify(update.previousValue) == JSON.stringify(update.value)) return;
-        console.log("acutally applying...");
 
         const next = update.value.map((seat) => ({
             id: seat.id,
@@ -49,7 +48,6 @@ export const SeatsEditor = () => {
     });
 
     useEffect(() => {
-        console.log("got state update...");
         const mapped = nodes.map((node) => ({
             id: node.id,
             row: node.position.x,
@@ -59,11 +57,7 @@ export const SeatsEditor = () => {
             entityType: node.data.entityType,
         }));
 
-        console.log({ mapped });
-
         if (JSON.stringify(mapped) == JSON.stringify(form.getValues().nodes)) return;
-        console.log("actually pushing to form...");
-
         form.setFieldValue("nodes", mapped, { forceUpdate: true });
     }, [JSON.stringify(nodes)]);
 
@@ -118,7 +112,7 @@ export const SeatsEditor = () => {
                 onNodeDragStop={() => keep(nodes)}
                 nodeDragThreshold={gridSpacing}
                 panOnScroll
-                panOnDrag={[1, 2]} // somehow this magically means that we only pan around when the user is holding the middle mouse button :eyeroll:
+                panOnDrag={arr([1, 2]).concatIf(!isLocked, [0]).get()} // only pan on middle or right mouse buttons
                 selectionOnDrag
                 selectionMode={SelectionMode.Partial}
             >

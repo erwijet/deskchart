@@ -21,3 +21,18 @@ export function runVoiding(f: () => unknown): () => void {
 export function createMarkerComponent() {
     return ({ children }: { children: ReactNode }) => children;
 }
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+type XArr<T> = {
+    get: () => T[];
+    concatIf: <E>(p: boolean | (() => boolean), o: E[]) => XArr<T | E>;
+};
+export function arr<T>(ker: T[]): XArr<T> {
+    return {
+        get: () => ker,
+        concatIf<E>(p: boolean | (() => boolean), other: E[]) {
+            if (typeof p == "function" ? p() : p) return arr([...ker, ...other]);
+            else return this;
+        },
+    };
+}

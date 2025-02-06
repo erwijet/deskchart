@@ -5,7 +5,7 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import { PlusCircle, X } from "lucide-react";
 import { Suspense, useState } from "react";
 import { Content } from "shared/components/content";
-import { LayoutEditor } from "shared/components/layout/layout-editor";
+import { LayoutEditor } from "shared/components/classroom/layout/layout-editor";
 import { logger } from "shared/logger";
 import { trpc } from "shared/trpc";
 

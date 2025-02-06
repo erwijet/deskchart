@@ -66,7 +66,7 @@ model Seat {
     col Int
 
     podId String
-    pod   Pod    @relation(fields: [podId], references: [id])
+    pod   Pod    @relation(fields: [podId], references: [id], onDelete: Cascade)
 }
 
 model Accommodation {

@@ -89,62 +89,36 @@ const appRouter = t.router({
                             .array(),
                     }),
                 )
-                .mutation(async ({ ctx: { userId: ownerId }, input: { id, title, pods } }) =>
-                    prisma.classroom.update({
+                .mutation(async ({ ctx: { userId: ownerId }, input: { id, title, pods } }) => {
+                    const classroom = await prisma.classroom
+                        .findFirst({ where: { id, ownerId }, include: { pods: true } })
+                        .then(ensure.nonnull());
+
+                    await Promise.all(
+                        arr(classroom.pods)
+                            .to("id")
+                            .minus(arr(pods).to("id"))
+                            .get()
+                            .map((id) => prisma.pod.delete({ where: { id } })),
+                    );
+
+                    await prisma.classroom.update({
                         where: { id, ownerId },
-                        include: { pods: true },
                         data: {
                             title,
                             pods: {
-                                deleteMany: {},
-                                createMany: { data: pods },
+                                upsert: pods.map(({ id, hex, title }) => ({
+                                    where: { id },
+                                    update: { title, hex },
+                                    create: { id, hex, title },
+                                })),
                             },
                         },
-                    }),
-                ),
-        },
-        setDetails: authenticated
-            .input(
-                z.object({
-                    id: z.string(),
-                    title: z.string(),
-                    pods: z
-                        .object({
-                            title: z.string(),
-                            hex: z.string(),
-                            seats: z
-                                .object({
-                                    col: z.number(),
-                                    row: z.number(),
-                                })
-                                .array(),
-                        })
-                        .array(),
-                    entities: z
-                        .object({
-                            type: z.nativeEnum($Enums.EntityType),
-                            dir: z.nativeEnum($Enums.NodeDirection),
-                            col: z.number(),
-                            row: z.number(),
-                        })
-                        .array(),
-                }),
-            )
-            .mutation(({ ctx: { userId: ownerId }, input: { id, title, pods, entities } }) => {
-                prisma.classroom.update({
-                    where: { id, ownerId },
-                    include: { pods: true },
-                    data: {
-                        title,
-                        entities: { create: entities },
-                        pods: {
-                            create: pods.map((p) => ({ ...p, seats: { create: p.seats } })),
-                        },
-                    },
-                });
+                    });
 
-                return ok();
-            }),
+                    return ok();
+                }),
+        },
         setSections: authenticated
             .input(
                 z.object({

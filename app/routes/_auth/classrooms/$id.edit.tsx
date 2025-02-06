@@ -6,7 +6,7 @@ import { Cog, Trash2 } from "lucide-react";
 import { ClassroomEditor } from "shared/components/classroom/classroom-editor";
 import { ClassroomFormProvider, ClassroomState, useClassroomForm } from "shared/components/classroom/context";
 import { Content } from "shared/components/content";
-import { LayoutEditor } from "shared/components/layout/layout-editor";
+import { LayoutEditor } from "shared/components/classroom/layout/layout-editor";
 import { SplitButton } from "shared/components/split-button";
 import { runVoiding } from "shared/fns";
 import { logger } from "shared/logger";
@@ -18,6 +18,7 @@ function RouteComponent() {
     const [classroom, { refetch }] = trpc.classroom.details.useSuspenseQuery(id);
     const { mutateAsync: deleteAsync } = trpc.classroom.delete.useMutation();
     const { mutateAsync: saveSettings } = trpc.classroom.settings.save.useMutation();
+    const { mutateAsync: saveLayout, isPending } = trpc.classroom.setLayout.useMutation();
 
     const nav = useNavigate();
 
@@ -27,7 +28,15 @@ function RouteComponent() {
             width: 0,
             title: classroom.title,
             pods: classroom.pods,
-            nodes: [],
+            nodes: [
+                ...classroom.pods.flatMap((it) =>
+                    it.seats.map((s) => ({
+                        ...s,
+                        nodeType: "SEAT",
+                    })),
+                ),
+                ...classroom.entities.map((it) => ({ ...it, nodeType: "ENTITY", entityType: it.type })),
+            ] as ClassroomState["nodes"],
         },
     });
 
@@ -57,9 +66,10 @@ function RouteComponent() {
     }
 
     function handleAddSeat() {
-        form.setFieldValue("nodes", (prev) =>
-            prev.concat([{ id: createCuid(), col: 10, row: 10, podId: form.getValues().pods.at(0)!.id }]),
-        );
+        const podId = form.getValues().pods.at(0)?.id;
+        if (!podId) return logger.error("Failed to insert seat: no pods in classroom");
+
+        form.setFieldValue("nodes", (prev) => prev.concat([{ id: createCuid(), col: 10, row: 10, podId, nodeType: "SEAT" }]));
     }
 
     function handleAddWhiteboard() {
@@ -69,10 +79,19 @@ function RouteComponent() {
                     id: createCuid(),
                     col: 10,
                     row: 10,
+                    nodeType: "ENTITY",
                     entityType: "WHITEBOARD",
                 },
             ]),
         );
+    }
+
+    function handleSaveLayout() {
+        saveLayout({
+            id,
+            seats: form.getValues().nodes.filter((it) => it.nodeType == "SEAT") as never,
+            entities: form.getValues().nodes.filter((it) => it.nodeType == "ENTITY") as never,
+        });
     }
 
     const [opened, { open, close }] = useDisclosure(false);
@@ -92,6 +111,8 @@ function RouteComponent() {
                 </Content.Action>
                 <Content.Action>
                     <SplitButton
+                        onClick={handleSaveLayout}
+                        loading={isPending}
                         menu={{
                             Settings: { fn: open, icon: <Cog size={16} /> },
                         }}

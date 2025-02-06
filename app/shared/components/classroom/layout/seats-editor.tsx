@@ -10,7 +10,7 @@ import { Copy, Lock, Redo2, Trash, Undo2, Unlock } from "lucide-react";
 import { useFormSubscription } from "shared/hooks/use-form-subscription";
 import { useUndo } from "shared/hooks/use-undo";
 import { createCuid } from "shared/str";
-import { useClassroomFormContext } from "../classroom/context";
+import { useClassroomFormContext } from "shared/components/classroom/context";
 import { arr } from "shared/fns";
 
 const gridSpacing = 10;
@@ -20,8 +20,7 @@ export const SeatsEditor = () => {
     const pods = useFormSubscription(form, "pods");
     const [nodes, setNodes, onNodesChanged] = useNodesState([]);
     const [isLocked, setIsLocked] = useState(true);
-
-    console.log(form.values);
+    const [isReady, setIsReady] = useState(false);
 
     const { canUndo, canRedo, undo, redo, keep } = useUndo(nodes, { setState: setNodes });
 
@@ -34,11 +33,12 @@ export const SeatsEditor = () => {
     ]);
 
     form.watch("nodes", (update) => {
+        if (!isReady) return;
         if (JSON.stringify(update.previousValue) == JSON.stringify(update.value)) return;
 
         const next = update.value.map((seat) => ({
             id: seat.id,
-            type: !!seat.podId ? "seat" : "entity",
+            type: !!seat.podId ? "SEAT" : "ENTITY",
             data: { podId: seat.podId, entityType: seat.entityType },
             position: { x: seat.row, y: seat.col },
         }));
@@ -48,24 +48,34 @@ export const SeatsEditor = () => {
     });
 
     useEffect(() => {
+        if (!isReady) return;
         const mapped = nodes.map((node) => ({
             id: node.id,
             row: node.position.x,
             col: node.position.y,
             flag: node.data.flag,
             podId: node.data.podId,
+            nodeType: node.type as "SEAT" | "ENTITY",
             entityType: node.data.entityType,
         }));
-
         if (JSON.stringify(mapped) == JSON.stringify(form.getValues().nodes)) return;
         form.setFieldValue("nodes", mapped, { forceUpdate: true });
     }, [JSON.stringify(nodes)]);
 
     useEffect(() => {
         document.querySelector(".react-flow__panel")?.remove();
+        const initial = form.getValues().nodes.map((node) => ({
+            id: node.id,
+            type: !!node.podId ? "SEAT" : "ENTITY",
+            data: { podId: node.podId, entityType: node.entityType },
+            position: { x: node.row, y: node.col },
+        }));
+
+        setNodes(initial);
+        setIsReady(true);
     }, []);
 
-    const nodeTypes = useMemo(() => ({ seat: SeatNode, entity: EntityNode }), []);
+    const nodeTypes = useMemo(() => ({ SEAT: SeatNode, ENTITY: EntityNode }), []);
     const selected = nodes.filter((it) => it.selected);
 
     function handleSetPodForSelectedNode(podId: string) {
@@ -144,7 +154,7 @@ export const SeatsEditor = () => {
                         </ActionIcon.Group>
                         <Group>
                             <Select
-                                disabled={selected.length == 0 || !selected.every((it) => it.type == "seat")}
+                                disabled={selected.length == 0 || !selected.every((it) => it.type == "SEAT")}
                                 searchable
                                 value={selected.at(0)?.data["podId"]}
                                 data={pods.map((pod) => ({ value: pod.id, label: pod.title }))}

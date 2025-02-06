@@ -3,7 +3,7 @@ import { $Enums, PrismaClient } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { TRPC_ERROR_CODE_KEY } from "@trpc/server/dist/rpc";
-import { runCatching } from "shared/fns";
+import { arr, runCatching } from "shared/fns";
 import { defineEventHandler, toWebRequest } from "vinxi/http";
 import { z } from "zod";
 
@@ -67,7 +67,7 @@ const appRouter = t.router({
             prisma.classroom
                 .findFirst({
                     where: { ownerId, id },
-                    include: { pods: { include: { seats: true } }, sections: { include: { students: true } } },
+                    include: { pods: { include: { seats: true } }, sections: { include: { students: true } }, entities: true },
                 })
                 .then(ensure.nonnull()),
         ),
@@ -174,6 +174,58 @@ const appRouter = t.router({
                 );
 
                 return ok();
+            }),
+        setLayout: authenticated
+            .input(
+                z.object({
+                    id: z.string(),
+                    seats: z.object({ id: z.string(), row: z.number().int(), col: z.number().int(), podId: z.string() }).array(),
+                    entities: z
+                        .object({
+                            id: z.string(),
+                            row: z.number().int(),
+                            col: z.number().int(),
+                            entityType: z.enum(["DOOR", "WHITEBOARD", "TEACHER"]),
+                        })
+                        .array(),
+                }),
+            )
+            .mutation(async ({ ctx: { userId: ownerId }, input: { id, entities, seats } }) => {
+                const classroom = await prisma.classroom
+                    .findFirst({ where: { id, ownerId }, include: { pods: { include: { seats: true } }, entities: true } })
+                    .then(ensure.nonnull());
+
+                // (1) delete any old seats not present in our input
+                await Promise.all(
+                    arr(classroom.pods.flatMap((it) => it.seats))
+                        .to("id")
+                        .minus(arr(seats).to("id"))
+                        .get()
+                        .map((id) => prisma.seat.delete({ where: { id } })),
+                );
+
+                // (2) do the same for entities
+                await Promise.all(
+                    arr(classroom.entities)
+                        .to("id")
+                        .minus(arr(entities).to("id"))
+                        .get()
+                        .map((id) => prisma.entity.delete({ where: { id } })),
+                );
+
+                // (3) upsert seats
+                await Promise.all(seats.map((s) => prisma.seat.upsert({ where: { id: s.id }, create: s, update: s })));
+
+                // (4) ...and entities
+                await Promise.all(
+                    entities.map(({ id, col, row, entityType }) =>
+                        prisma.entity.upsert({
+                            where: { id },
+                            create: { id, col, row, type: entityType, dir: "VERTICAL", classroomId: classroom.id },
+                            update: { col, row, type: entityType },
+                        }),
+                    ),
+                );
             }),
         delete: authenticated
             .input(z.string())

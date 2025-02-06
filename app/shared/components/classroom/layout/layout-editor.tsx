@@ -3,8 +3,8 @@ import { zodResolver } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { z } from "zod";
 import { randomId } from "@mantine/hooks";
-import { SeatsEditor } from "shared/components/layout/seats-editor";
-import { useClassroomFormContext, usePodForm } from "../classroom/context";
+import { SeatsEditor } from "shared/components/classroom/layout/seats-editor";
+import { useClassroomFormContext, usePodForm } from "shared/components/classroom/context";
 
 export const LayoutEditor = () => {
     const form = useClassroomFormContext();

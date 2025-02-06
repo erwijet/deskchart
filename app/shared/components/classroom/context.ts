@@ -21,7 +21,8 @@ export const classroomSchema = z.object({
             row: z.number().int(),
             col: z.number().int(),
 
-            entityType: z.union([z.literal("SEAT"), z.literal("WHITEBOARD"), z.literal("TEACHER")]).optional(),
+            nodeType: z.union([z.literal("SEAT"), z.literal("ENTITY")]),
+            entityType: z.union([z.literal("DOOR"), z.literal("WHITEBOARD"), z.literal("TEACHER")]).optional(),
             podId: z.string().cuid().optional(),
         })
         .array(),

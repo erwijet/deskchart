@@ -9,13 +9,13 @@ import { useHotkeys } from "@mantine/hooks";
 import { Copy, Lock, Redo2, Trash, Undo2, Unlock } from "lucide-react";
 import { useFormSubscription } from "shared/hooks/use-form-subscription";
 import { useUndo } from "shared/hooks/use-undo";
-import { createCuid } from "shared/str";
+import { createCuid, titlecase } from "shared/str";
 import { useClassroomFormContext } from "shared/components/classroom/context";
 import { arr } from "shared/fns";
 
 const gridSpacing = 10;
 
-export const SeatsEditor = () => {
+export const LayoutEditor = () => {
     const form = useClassroomFormContext();
     const pods = useFormSubscription(form, "pods");
     const [nodes, setNodes, onNodesChanged] = useNodesState([]);
@@ -202,19 +202,19 @@ const SeatNode = ({ selected, data }: { selected: boolean; data: { podId: string
     );
 };
 
-const EntityNode = ({ selected }: { selected: boolean }) => {
+const EntityNode = ({ selected, data }: { selected: boolean; data: { entityType: string } }) => {
     return (
         <>
             <div
                 style={{
-                    padding: "10px 40px",
+                    padding: data.entityType == "WHITEBOARD" ? "10px 40px" : "20px 20px",
                     height: "100%",
                     border: "solid 1px",
                     borderRadius: "4px",
                     borderColor: selected ? "var(--mantine-primary-color-filled)" : "var(--mantine-color-gray-outline)",
                 }}
             >
-                whiteboard
+                {titlecase(data.entityType)}
             </div>
         </>
     );

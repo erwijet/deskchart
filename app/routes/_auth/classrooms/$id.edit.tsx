@@ -6,7 +6,7 @@ import { Cog, Trash2 } from "lucide-react";
 import { ClassroomEditor } from "shared/components/classroom/classroom-editor";
 import { ClassroomFormProvider, ClassroomState, useClassroomForm } from "shared/components/classroom/context";
 import { Content } from "shared/components/content";
-import { LayoutEditor } from "shared/components/classroom/layout/layout-editor";
+import { LayoutEditor } from "shared/components/classroom/layout/editor";
 import { SplitButton } from "shared/components/split-button";
 import { runVoiding } from "shared/fns";
 import { logger } from "shared/logger";
@@ -72,7 +72,7 @@ function RouteComponent() {
         form.setFieldValue("nodes", (prev) => prev.concat([{ id: createCuid(), col: 10, row: 10, podId, nodeType: "SEAT" }]));
     }
 
-    function handleAddWhiteboard() {
+    function handleAddEntity(entityType: "TEACHER" | "WHITEBOARD") {
         form.setFieldValue("nodes", (prev) =>
             prev.concat([
                 {
@@ -80,7 +80,7 @@ function RouteComponent() {
                     col: 10,
                     row: 10,
                     nodeType: "ENTITY",
-                    entityType: "WHITEBOARD",
+                    entityType,
                 },
             ]),
         );
@@ -100,8 +100,13 @@ function RouteComponent() {
         <ClassroomFormProvider form={form}>
             <Content withBack title={classroom.title}>
                 <Content.Action>
-                    <Button variant="default" onClick={handleAddWhiteboard}>
+                    <Button variant="default" onClick={() => handleAddEntity("WHITEBOARD")}>
                         Add Whiteboard
+                    </Button>
+                </Content.Action>
+                <Content.Action>
+                    <Button variant="default" onClick={() => handleAddEntity("TEACHER")}>
+                        Add Teacher Desk
                     </Button>
                 </Content.Action>
                 <Content.Action>

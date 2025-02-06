@@ -80,9 +80,8 @@ model Accommodation {
 }
 
 model Student {
-    id String @id @default(cuid())
-    gn String
-    sn String
+    id   String @id @default(cuid())
+    name String
 
     ownerId   String
     createdAt DateTime @default(now())

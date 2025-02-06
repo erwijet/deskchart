@@ -10,13 +10,13 @@ import { Copy, Lock, Redo2, Trash, Undo2, Unlock } from "lucide-react";
 import { useFormSubscription } from "shared/hooks/use-form-subscription";
 import { useUndo } from "shared/hooks/use-undo";
 import { createCuid, titlecase } from "shared/str";
-import { useClassroomFormContext } from "shared/components/classroom/context";
+import { useClassroomLayoutFormContext } from "shared/components/classroom/layout/context";
 import { arr } from "shared/fns";
 
 const gridSpacing = 10;
 
-export const LayoutEditor = () => {
-    const form = useClassroomFormContext();
+export const NodesEditor = () => {
+    const form = useClassroomLayoutFormContext();
     const pods = useFormSubscription(form, "pods");
     const [nodes, setNodes, onNodesChanged] = useNodesState([]);
     const [isLocked, setIsLocked] = useState(true);
@@ -181,7 +181,7 @@ export const LayoutEditor = () => {
 };
 
 const SeatNode = ({ selected, data }: { selected: boolean; data: { podId: string } }) => {
-    const form = useClassroomFormContext();
+    const form = useClassroomLayoutFormContext();
     const pods = useFormSubscription(form, "pods");
 
     const backgroundColor = pods.find((it) => it.id == data.podId)?.hex;

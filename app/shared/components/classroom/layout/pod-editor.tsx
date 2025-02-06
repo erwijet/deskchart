@@ -1,5 +1,5 @@
 import { ColorInput, Stack, TextInput } from "@mantine/core";
-import { usePodFormContext } from "components/classroom/context";
+import { usePodFormContext } from "shared/components/classroom/layout/context";
 import { useFormSubscription } from "shared/hooks/use-form-subscription";
 
 export function PodEditor() {

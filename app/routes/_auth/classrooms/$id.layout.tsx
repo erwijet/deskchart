@@ -3,10 +3,10 @@ import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { Cog, Trash2 } from "lucide-react";
-import { ClassroomEditor } from "shared/components/classroom/classroom-editor";
-import { ClassroomFormProvider, ClassroomState, useClassroomForm } from "shared/components/classroom/context";
+import { SettingsEditor } from "shared/components/classroom/layout/settings-editor";
+import { ClassroomLayoutFormProvider, ClassroomLayoutState, useClassroomLayoutForm } from "shared/components/classroom/layout/context";
 import { Content } from "shared/components/content";
-import { LayoutEditor } from "shared/components/classroom/layout/editor";
+import { NodesEditor } from "shared/components/classroom/layout/nodes-editor";
 import { SplitButton } from "shared/components/split-button";
 import { runVoiding } from "shared/fns";
 import { logger } from "shared/logger";
@@ -14,7 +14,7 @@ import { createCuid } from "shared/str";
 import { trpc } from "shared/trpc";
 
 function RouteComponent() {
-    const { id } = useParams({ from: "/_auth/classrooms/$id/edit" });
+    const { id } = useParams({ from: "/_auth/classrooms/$id/layout" });
     const [classroom, { refetch }] = trpc.classroom.details.useSuspenseQuery(id);
     const { mutateAsync: deleteAsync } = trpc.classroom.delete.useMutation();
     const { mutateAsync: saveSettings } = trpc.classroom.settings.save.useMutation();
@@ -22,7 +22,7 @@ function RouteComponent() {
 
     const nav = useNavigate();
 
-    const form = useClassroomForm({
+    const form = useClassroomLayoutForm({
         initialValues: {
             height: 0,
             width: 0,
@@ -35,12 +35,16 @@ function RouteComponent() {
                         nodeType: "SEAT",
                     })),
                 ),
-                ...classroom.entities.map((it) => ({ ...it, nodeType: "ENTITY", entityType: it.type })),
-            ] as ClassroomState["nodes"],
+                ...classroom.entities.map((it) => ({
+                    ...it,
+                    nodeType: "ENTITY",
+                    entityType: it.type,
+                })),
+            ] as ClassroomLayoutState["nodes"],
         },
     });
 
-    function handleSaveSettings(data: ClassroomState) {
+    function handleSaveSettings(data: ClassroomLayoutState) {
         saveSettings({ id, ...data })
             .then(runVoiding(refetch))
             .then(close)
@@ -97,7 +101,7 @@ function RouteComponent() {
     const [opened, { open, close }] = useDisclosure(false);
 
     return (
-        <ClassroomFormProvider form={form}>
+        <ClassroomLayoutFormProvider form={form}>
             <Content withBack title={classroom.title}>
                 <Content.Action>
                     <Button variant="default" onClick={() => handleAddEntity("WHITEBOARD")}>
@@ -127,54 +131,16 @@ function RouteComponent() {
                 </Content.Action>
 
                 <Drawer opened={opened} onClose={close} position="right" title={<Title order={3}>Settings</Title>} closeOnEscape={false}>
-                    <ClassroomEditor onDelete={handleDelete} onSave={handleSaveSettings} />
+                    <SettingsEditor onDelete={handleDelete} onSave={handleSaveSettings} />
                 </Drawer>
 
-                <LayoutEditor />
-
-                {/* <Button onClick={open}>Edit Details</Button> */}
-
-                {/* <LayoutFormProvider form={layoutForm}>
-                <LayoutEditor layoutId={classroom.layouts.at(0)!.id} />
-            </LayoutFormProvider> */}
-
-                {/* <Table>
-                <Table.Tbody>
-                    {classroom.layouts.map((layout) => (
-                        <Table.Tr key={layout.id}>
-                            <Table.Td>
-                                <Text>{`${layout.title}`}</Text>
-                                <Text size="xs" c="dimmed">
-                                    <em>{getRelativeTimeString(new Date(layout.updatedAt))}</em>
-                                </Text>
-                            </Table.Td>
-                            <Table.Td>
-                                <Group justify="flex-end">
-                                    <Menu position="bottom-start">
-                                        <Menu.Target>
-                                            <ActionIcon variant="transparent">
-                                                <MoreHorizontal />
-                                            </ActionIcon>
-                                        </Menu.Target>
-                                        <Menu.Dropdown>
-                                            <Menu.Item leftSection={<LayoutDashboard size={16} />}>Edit</Menu.Item>
-                                            <Menu.Item leftSection={<Trash2 size={16} />} color="red">
-                                                Delete
-                                            </Menu.Item>
-                                        </Menu.Dropdown>
-                                    </Menu>
-                                </Group>
-                            </Table.Td>
-                        </Table.Tr>
-                    ))}
-                </Table.Tbody>
-            </Table> */}
+                <NodesEditor />
             </Content>
-        </ClassroomFormProvider>
+        </ClassroomLayoutFormProvider>
     );
 }
 
-export const Route = createFileRoute("/_auth/classrooms/$id/edit")({
+export const Route = createFileRoute("/_auth/classrooms/$id/layout")({
     loader: ({ context: { trpcQC: trpcQueryUtils }, params: { id } }) => {
         trpcQueryUtils.classroom.details.ensureData(id).catch(logger.log);
     },

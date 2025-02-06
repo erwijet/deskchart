@@ -2,8 +2,13 @@ import { ActionIcon, Button, Divider, Group, Paper, SimpleGrid, Stack, Text, Tex
 import { modals } from "@mantine/modals";
 import { colord, extend } from "colord";
 import names from "colord/plugins/names";
-import { ClassroomState, PodFormProvider, useClassroomFormContext, usePodForm } from "components/classroom/context";
-import { PodEditor } from "components/classroom/pod-editor";
+import {
+    ClassroomLayoutState,
+    PodFormProvider,
+    useClassroomLayoutFormContext,
+    usePodForm,
+} from "shared/components/classroom/layout/context";
+import { PodEditor } from "shared/components/classroom/layout/pod-editor";
 import { Edit, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import { createRandomColor } from "shared/color";
@@ -11,8 +16,8 @@ import { createCuid, titlecase } from "shared/str";
 
 extend([names]);
 
-export const ClassroomEditor = (props: { onDelete?: () => unknown; onSave?: (data: ClassroomState) => unknown }) => {
-    const form = useClassroomFormContext();
+export const SettingsEditor = (props: { onDelete?: () => unknown; onSave?: (data: ClassroomLayoutState) => unknown }) => {
+    const form = useClassroomLayoutFormContext();
     const pod = usePodForm();
 
     function handleCreatePod() {

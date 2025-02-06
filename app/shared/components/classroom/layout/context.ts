@@ -10,7 +10,7 @@ const podSchema = z.object({
 type PodState = z.infer<typeof podSchema>;
 export const [PodFormProvider, usePodFormContext, usePodForm] = createFormContext<PodState>();
 
-export const classroomSchema = z.object({
+export const classroomLayoutSchema = z.object({
     title: z.string(),
     height: z.number().int(),
     width: z.number().int(),
@@ -28,5 +28,6 @@ export const classroomSchema = z.object({
         .array(),
 });
 
-export type ClassroomState = z.infer<typeof classroomSchema>;
-export const [ClassroomFormProvider, useClassroomFormContext, useClassroomForm] = createFormContext<ClassroomState>();
+export type ClassroomLayoutState = z.infer<typeof classroomLayoutSchema>;
+export const [ClassroomLayoutFormProvider, useClassroomLayoutFormContext, useClassroomLayoutForm] =
+    createFormContext<ClassroomLayoutState>();

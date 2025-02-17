@@ -2,7 +2,7 @@ import "react-resizable/css/styles.css";
 import "reactflow/dist/style.css";
 
 import { useEffect, useMemo, useState } from "react";
-import ReactFlow, { Background, SelectionMode, useNodesState } from "reactflow";
+import ReactFlow, { Background, Node, SelectionMode, useNodesState } from "reactflow";
 
 import { ActionIcon, Box, Group, Paper, rem, Select, Tooltip } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
@@ -21,6 +21,7 @@ export const NodesEditor = () => {
     const [nodes, setNodes, onNodesChanged] = useNodesState([]);
     const [isLocked, setIsLocked] = useState(true);
     const [isReady, setIsReady] = useState(false);
+    const [clipboard, setClipboard] = useState<Node[]>([]);
 
     const { canUndo, canRedo, undo, redo, keep } = useUndo(nodes, { setState: setNodes });
 
@@ -30,6 +31,11 @@ export const NodesEditor = () => {
         ["mod+z", () => undo(), { preventDefault: true }],
         ["ctrl+shift+Z", () => redo(), { preventDefault: true }],
         ["mod+shift+Z", () => redo(), { preventDefault: true }],
+        ["ctrl+c", handleCopy],
+        ["ctrl+v", handlePaste],
+        ["mod+c", handleCopy],
+        ["mod+v", handlePaste],
+        ["backspace", handleDeleteSelected],
     ]);
 
     form.watch("nodes", (update) => {
@@ -78,37 +84,65 @@ export const NodesEditor = () => {
     const nodeTypes = useMemo(() => ({ SEAT: SeatNode, ENTITY: EntityNode }), []);
     const selected = nodes.filter((it) => it.selected);
 
-    function handleSetPodForSelectedNode(podId: string) {
+    type NodeMorph = { action: "create" | "delete" | "set"; nodes: Node[]; select?: Node[] };
+    function mutate(fn: (prev: Node[]) => NodeMorph[] | NodeMorph) {
         keep(nodes);
+        [fn(nodes)].flat().forEach((morph) => {
+            if (morph.action == "create") createNodes(morph.nodes);
+            if (morph.action == "delete") setNodes((prev) => prev.filter((it) => !morph.nodes.map((it) => it.id).includes(it.id)));
+            if (morph.action == "set") setNodes(() => morph.nodes);
+        });
+    }
 
-        setNodes((prev) =>
-            prev.map((it) =>
-                selected.some((s) => s.id == it.id)
-                    ? {
-                          ...it,
-                          data: {
-                              ...it.data,
-                              podId,
-                              hex: form.getValues().pods.find((it) => it.id == podId)!.hex,
-                          },
-                      }
-                    : it,
-            ),
-        );
+    function createNodes(incoming: Node[]) {
+        const nodes = incoming.map((each) => ({ ...each, selected: false, id: createCuid() }));
+        setNodes((prev) => prev.concat(nodes));
+        setTimeout(() => {
+            setNodes((prev) => prev.map((each) => (nodes.map((it) => it.id).includes(each.id) ? { ...each, selected: true } : each)));
+        }, 0);
+    }
+
+    function offsetNode(node: Node): Node {
+        return {
+            ...node,
+            position: {
+                x: node.position.x + 10,
+                y: node.position.y + 10,
+            },
+        };
+    }
+
+    function handleCopy() {
+        if (selected.length == 0) return;
+        setClipboard(selected);
+    }
+
+    function handlePaste() {
+        mutate(() => {
+            return {
+                action: "create",
+                nodes: clipboard.map(offsetNode),
+            };
+        });
+    }
+
+    function handleSetPodForSelectedNode(podId: string) {
+        const { hex } = form.getValues().pods.find((it) => it.id == podId)!;
+
+        mutate((nodes) => ({
+            action: "set",
+            nodes: nodes.map((node) => (node.selected ? { ...node, data: { ...node.data, podId, hex } } : node)),
+        }));
     }
 
     function handleDuplicateSelectedNode() {
         if (!selected) return;
-
-        keep(nodes);
-        setNodes((nodes) => nodes.concat(selected.map((each) => ({ ...each, selected: false, id: createCuid() }))));
+        mutate(() => ({ action: "create", nodes: selected }));
     }
 
     function handleDeleteSelected() {
         if (!selected) return;
-
-        keep(nodes);
-        setNodes((nodes) => nodes.filter((it) => !it.selected));
+        mutate(() => ({ action: "delete", nodes: nodes.filter((it) => it.selected) }));
     }
 
     return (
@@ -119,12 +153,14 @@ export const NodesEditor = () => {
                 nodes={nodes}
                 nodeTypes={nodeTypes}
                 onNodesChange={onNodesChanged}
-                onNodeDragStop={() => keep(nodes)}
+                onSelectionDragStop={() => keep(nodes)} // fired when a group of selected nodes are dragged
+                onNodeDragStop={() => keep(nodes)} // fired when only a single node is dragged
                 nodeDragThreshold={gridSpacing}
                 panOnScroll
                 panOnDrag={arr([1, 2]).concatIf(!isLocked, [0]).get()} // only pan on middle or right mouse buttons
                 selectionOnDrag
                 selectionMode={SelectionMode.Partial}
+                deleteKeyCode={null} // we want to handle delete on backspace ourselves
             >
                 <Background gap={gridSpacing} />
 
@@ -190,14 +226,22 @@ const SeatNode = ({ selected, data }: { selected: boolean; data: { podId: string
         <>
             <div
                 style={{
-                    padding: "20px",
+                    // padding: "20px",
+                    width: "40px",
+                    height: "40px",
+                    display: "flex",
+                    flexWrap: "nowrap",
                     backgroundColor,
-                    height: "100%",
+                    // height: "100%",
                     border: "solid 1px",
                     borderRadius: "1px",
                     borderColor: selected ? "var(--mantine-primary-color-filled)" : "var(--mantine-color-gray-outline)",
                 }}
-            />
+            >
+                <span style={{ fontSize: "50%", textAlign: "center", margin: "auto", color: "black", fontWeight: "600" }}>
+                    Supercaligradgkjashdfk
+                </span>
+            </div>
         </>
     );
 };
